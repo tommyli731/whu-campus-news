@@ -40,7 +40,22 @@ python api.py     # http://localhost:8000
 | 🟢 **API** | `https://whu-campus-news.app.workbuddy.host/api/notices` |
 | 🟢 **网站** | `https://whu-campus-news.app.workbuddy.host/` |
 
-任何人可直接调用，无需注册与 API Key。
+任何人可直接调用，无需注册与 API Key。数据每日 08:00与 18:00 自动采集。
+
+---
+
+## 🤖 DeepSeek Harness 插件
+
+让 AI 助手直接查询校园资讯，装上后对AI 说话即可：
+
+> **你**：最近有什么重要的通知？
+> **AI**：（自动调用插件）找到 3 条重要通知……
+
+**插件仓库**：[tommyli731/dsh-plugin-whu-news](https://github.com/tommyli731/dsh-plugin-whu-news)
+
+提供 4 个工具：`whu_notices` 浏览资讯 · `whu_search` 关键词搜索 · `whu_notice_detail` 查看详情 · `whu_news_overview` 数据概览
+
+详见[插件 README](https://github.com/tommyli731/dsh-plugin-whu-news)。
 
 ---
 
