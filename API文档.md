@@ -96,6 +96,22 @@ export API_KEY=your-secret && python api.py
 
 ---
 
+## 十、自动更新机制
+
+线上 API 的数据每日自动更新，无需重新部署：
+
+```
+GitHub Actions 采集 → 提交 data_news.json → API 运行时自动拉取
+```
+
+- **采集频率**：每天北京时间 08:00 与 18:00
+- **数据源**：GitHub 仓库作为唯一数据源
+- **多源容错**：raw.githubusercontent / ghproxy / jsDelivr 三源轮换
+- **回退机制**：远程不可用时使用本地副本，服务不中断
+- **健康检查**：访问 `/api/health` 查看 `data_source` 字段确认当前是`remote` 还是 `local`
+
+---
+
 ## 三、接口一览
 
 | 方法 | 路径 | 说明 |
@@ -490,4 +506,4 @@ fetch('http://localhost:8000/api/notices', {
 
 ---
 
-**版本** 1.0.0 ｜ **实测** 31/31 项通过 ｜ 全部接口与 `openapi.yaml` 逐项比对一致
+**版本** 1.1.0 ｜ **实测** 31/31 项通过 ｜ 全部接口与 `openapi.yaml` 逐项比对一致

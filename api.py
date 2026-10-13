@@ -29,20 +29,27 @@ import uuid
 import threading
 import argparse
 import urllib.parse
+import urllib.request
+import urllib.error
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from datetime import datetime
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, 'data_news.json')
 
-# 远程数据源：GitHub 仓库中的数据文件。
-# GitHub Actions 每次采集后会提交新数据，API 运行时自动拉取最新版本，
+# 远程数据源：按优先级尝试，GitHub 仓库为唯一数据源。
+# GitHub Actions 每次采集后提交新数据，API 运行时自动拉取，
 # 这样无需重新部署即可让线上数据保持新鲜。
-REMOTE_DATA_URL = os.environ.get(
-    'REMOTE_DATA_URL',
-    'https://raw.githubusercontent.com/tommyli731/whu-campus-news/main/data_news.json'
-)
-REMOTE_TIMEOUT = 8
+# 多个镜像轮换可用性，避免单一入口不可达导致数据停滞。
+REMOTE_DATA_URLS = [
+    u.strip() for u in os.environ.get('REMOTE_DATA_URLS', '').split(',') if u.strip()
+] or [
+    'https://ghproxy.net/https://raw.githubusercontent.com/tommyli731/whu-campus-news/main/data_news.json',
+    'https://raw.githubusercontent.com/tommyli731/whu-campus-news/main/data_news.json',
+    'https://cdn.jsdelivr.net/gh/tommyli731/whu-campus-news@main/data_news.json',
+]
+REMOTE_DATA_URL = REMOTE_DATA_URLS[0]
+REMOTE_TIMEOUT = 15
 
 API_VERSION = '1.1.0'
 START_TIME = time.time()
@@ -76,21 +83,33 @@ _lock = threading.Lock()
 _CACHE_TTL = 300  # 远程数据缓存 5 分钟，避免高频请求打远程
 
 
+_remote_status = {'last_ok': None, 'source': None, 'checked_at': None}
+
+
 def fetch_remote():
-    """从 GitHub 拉取最新数据。失败返回 None。"""
-    if not REMOTE_DATA_URL:
+    """从远程数据源拉取最新数据（多源轮换）。
+
+    按 REMOTE_DATA_URLS 顺序尝试，第一个成功的即返回。
+    全部失败返回 None，由调用方回退到本地数据。
+    """
+    if not REMOTE_DATA_URLS:
         return None
-    try:
-        req = urllib.request.Request(REMOTE_DATA_URL, headers={
-            'User-Agent': 'WHU-Campus-News-Api/' + API_VERSION,
-            'Accept': 'application/json',
-        })
-        with urllib.request.urlopen(req, timeout=REMOTE_TIMEOUT) as r:
-            data = json.loads(r.read().decode('utf-8'))
-        if isinstance(data, dict) and data.get('items'):
-            return data
-    except Exception:
-        pass
+    for url in REMOTE_DATA_URLS:
+        try:
+            req = urllib.request.Request(url, headers={
+                'User-Agent': 'WHU-Campus-News-Api/' + API_VERSION,
+                'Accept': 'application/json',
+            })
+            with urllib.request.urlopen(req, timeout=REMOTE_TIMEOUT) as r:
+                data = json.loads(r.read().decode('utf-8'))
+            if isinstance(data, dict) and data.get('items'):
+                _remote_status.update({'last_ok': url, 'source': url,
+                                       'checked_at': datetime.now().strftime('%H:%M:%S')})
+                print('  [数据] 远程拉取成功 %d 条 <- %s' % (len(data['items']), url[:64]))
+                return data
+        except Exception as e:
+            print('  [数据] 远程源不可用 %s <- %s' % (type(e).__name__, url[:64]))
+            continue
     return None
 
 
@@ -352,11 +371,7 @@ class Handler(BaseHTTPRequestHandler):
     def handle_health(self, rid):
         data = load_data()
         local = load_local()
-        remote = 'unknown'
-        try:
-            remote = 'ok' if fetch_remote() else 'unreachable'
-        except Exception:
-            remote = 'error'
+        remote_ok = _remote_status.get('last_ok') is not None
         self.send_json({
             'success': True,
             'data': {
@@ -365,8 +380,10 @@ class Handler(BaseHTTPRequestHandler):
                 'data_available': data is not None,
                 'item_count': data.get('count', 0) if data else 0,
                 'data_updated_at': data.get('updated_at') if data else None,
-                'data_source': 'github' if (data and len(data['items']) >= len(local['items'] if local else {'items': []})) else 'local',
-                'remote_status': remote,
+                'data_source': 'remote' if remote_ok else 'local',
+                'remote_source': _remote_status.get('source'),
+                'remote_checked_at': _remote_status.get('checked_at'),
+                'local_item_count': len(local['items']) if local else 0,
                 'uptime_seconds': round(time.time() - START_TIME, 1),
                 'auth_required': bool(API_KEY),
                 'server_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -381,8 +398,8 @@ class Handler(BaseHTTPRequestHandler):
                 'name': '武汉大学校园资讯聚合 API',
                 'version': API_VERSION,
                 'description': '提供武汉大学各官方渠道资讯的查询接口。数据每日由 GitHub Actions 自动采集更新。',
-                'data_source': REMOTE_DATA_URL,
-                'auto_update': '每日 08:00 与 18:00（北京时间）自动采集',
+                'data_source': REMOTE_DATA_URLS,
+                'auto_update': '每日 08:00 与 18:00（北京时间）由 GitHub Actions 自动采集',
                 'auth': {
                     'required': bool(API_KEY),
                     'type': 'API Key',

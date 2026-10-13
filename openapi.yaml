@@ -2,7 +2,7 @@ openapi: 3.0.3
 
 info:
   title: 武汉大学校园资讯聚合 API
-  version: 1.0.0
+  version: 1.1.0
   description: |
     提供武汉大学各官方渠道（主站、新闻网等）资讯的查询接口。
 
@@ -699,6 +699,14 @@ components:
         auth_required:
           type: boolean
           example: false
+        data_source:
+          type: string
+          enum: [remote, local]
+          description: 数据来自 GitHub 远程仓库（remote）还是本地文件（local）
+        remote_source:
+          type: string
+          nullable: true
+          description: 实际使用的远程数据源地址
         server_time:
           type: string
           example: '2026-10-13 14:18:14'
