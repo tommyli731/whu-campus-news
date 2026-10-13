@@ -1,19 +1,40 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-微信公众号采集适配器（依赖 WeRSS）
+微信公众号采集适配器（支持三种后端，自动探测）
 
 与主爬虫的区别：
--主爬虫 crawler.py     抓学校官网（VSB9 静态页，零依赖）
-- 本模块wechat_mp.py   抓微信公众号（通过 WeRSS 转 RSS，零依赖）
+- 主爬虫 crawler.py抓学校官网（VSB9 静态页，零依赖）
+- 本模块 wechat_mp.py   抓微信公众号（纯标准库，零依赖）
 
-前置条件：
-1. 已部署 WeRSS 并完成扫码授权（见数据采集说明.md）
-2. WeRSS 服务地址，默认 http://localhost:8001
-   可用环境变量 WERSS_BASE 覆盖
-3. WeRSS API Token（可选），可用环境变量 WERSS_TOKEN 提供
+支持的后端（按 MP_BACKEND 指定，或自动依次探测）：
 
-若WeRSS 未部署，本模块会静默返回空列表，不影响主爬虫正常工作。
+  1. wechat2rss —— 公共服务 wechat2rss.xlab.app
+     · 无需任何登录
+     · 但仅收录约 800 个技术/安全类公众号，且不可自行添加
+     · 适合：技术类公众号；不适合武大（未收录）
+     RSS 格式：https://wechat2rss.xlab.app/feed/{hash}.xml
+     列表：https://raw.githubusercontent.com/ttttmr/Wechat2RSS/master/list/all.md
+
+  2. werss —— 自建 WeRSS（github.com/rachelos/we-mp-rss）
+     · 支持任意公众号
+     · 需部署 + 微信扫码授权
+     · 需 Docker 与 Chromium
+     RSS 格式：{WERSS_BASE}/feeds/all.rss
+
+  3. weread —— 微信读书反向订阅
+     · 无需微信扫码，只需注册微信读书账号
+     · 支持任意公众号（微信读书可关注公众号）
+     · 需部署 wewe-rss（注意：原 cooderl/wewe-rss 已归档，2026-01-19 起不再维护）
+     RSS 格式：{WEREAD_BASE}/feeds/all.rss
+
+环境变量：
+  MP_BACKEND      = auto | wechat2rss | werss | weread   （默认 auto）
+  WERSS_BASE      = http://localhost:8001
+  WEREAD_BASE     = http://localhost:4000
+  MP_RSS_URL      = 直接指定某个 RSS 地址（最高优先级，跳过后端探测）
+  MP_FEED_URLS    = 多个 RSS 地址，逗号分隔
+  WERSS_TOKEN     = WeRSS API Token（可选）
 """
 
 import os
@@ -26,9 +47,21 @@ import urllib.parse
 from datetime import datetime, timedelta
 from xml.etree import ElementTree
 
-# WeRSS 服务地址与凭据
+# ── 后端配置 ──────────────────────────────────────────────
+MP_BACKEND = os.environ.get('MP_BACKEND', 'auto').strip().lower()
+MP_RSS_URL = os.environ.get('MP_RSS_URL', '').strip()
+MP_FEED_URLS = [u.strip() for u in os.environ.get('MP_FEED_URLS', '').split(',') if u.strip()]
+
 WERSS_BASE = os.environ.get('WERSS_BASE', 'http://localhost:8001').rstrip('/')
+WEREAD_BASE = os.environ.get('WEREAD_BASE', 'http://localhost:4000').rstrip('/')
 WERSS_TOKEN = os.environ.get('WERSS_TOKEN', '').strip()
+
+W2R_BASE = 'https://wechat2rss.xlab.app'
+W2R_LIST_MIRRORS = [
+    'https://ghproxy.net/https://raw.githubusercontent.com/ttttmr/Wechat2RSS/master/list/all.md',
+    'https://raw.githubusercontent.com/ttttmr/Wechat2RSS/master/list/all.md',
+]
+
 TIMEOUT = 20
 
 # 公众号分类映射：按订阅号名称识别归入哪个栏目
@@ -139,59 +172,137 @@ def classify(mp_name, title, desc):
 
 
 def check_werss():
-    """探测 WeRSS 是否可用。返回 (可用?, 版本信息)。"""
-    url = f'{WERSS_BASE}/api/feeds'
-    txt = fetch(url)
-    if txt is None:
-        return False, None
-    try:
-        data = json.loads(txt)
-        n = len(data.get('data', []) or data.get('feeds', []) or [])
-        return True, f'可用，订阅源 {n} 个'
-    except Exception:
-        return False, None
+    """探测 WeRSS 是否可用。返回 (可用?, 说明)。"""
+    return _probe_rss(f'{WERSS_BASE}/feeds/all.rss', 'WeRSS')
 
 
-def fetch_feed_items():
-    """拉取 WeRSS 聚合 RSS（all.rss）。返回解析后的条目列表。"""
-    url = f'{WERSS_BASE}/feeds/all.rss'
+def check_weread():
+    """探测微信读书 RSS 服务。返回 (可用?, 说明)。"""
+    return _probe_rss(f'{WEREAD_BASE}/feeds/all.rss', '微信读书')
+
+
+def _probe_rss(url, label):
     txt = fetch(url)
     if not txt:
-        return []
+        return False, None
     try:
         root = ElementTree.fromstring(txt)
+        items = list(root.iter('item'))
+        return True, f'可用，{len(items)} 篇'
     except Exception:
-        return []
+        return False, None
 
+
+def load_w2r_index():
+    """拉取 Wechat2RSS 的公众号收录索引（多镜像容错）。"""
+    txt = None
+    for u in W2R_LIST_MIRRORS:
+        txt = fetch(u)
+        if txt:
+            break
+    if not txt:
+        return {}
+    out = {}
+    for m in re.finditer(r'\[([^\]]+)\]\(' + re.escape(W2R_BASE) + r'/feed/([0-9a-f]+)\.xml\)', txt):
+        out[m.group(1)] = f'{W2R_BASE}/feed/{m.group(2)}.xml'
+    return out
+
+
+def detect_backend():
+    """探测可用的后端。返回 (后端名, RSS地址列表, 说明)。"""
+    # 1) 用户直接指定
+    if MP_RSS_URL:
+        return 'direct', [MP_RSS_URL], '使用 MP_RSS_URL'
+    if MP_FEED_URLS:
+        return 'direct', MP_FEED_URLS, f'使用 MP_FEED_URLS（{len(MP_FEED_URLS)} 个源）'
+
+    order = ['wechat2rss', 'weread', 'werss'] if MP_BACKEND == 'auto' else [MP_BACKEND]
+
+    for be in order:
+        if be == 'wechat2rss':
+            ok, info = _probe_rss(f'{W2R_BASE}/feed/5b925323244e9737c39285596c53e3a2f4a30774.xml',
+                                  'Wechat2RSS')
+            if ok:
+                idx = load_w2r_index()
+                return 'wechat2rss', [], f'公共服务可用，已收录 {len(idx)} 个公众号'
+        elif be == 'weread':
+            ok, info = check_weread()
+            if ok:
+                return 'weread', [f'{WEREAD_BASE}/feeds/all.rss'], f'微信读书服务：{info}'
+        elif be == 'werss':
+            ok, info = check_werss()
+            if ok:
+                return 'werss', [f'{WERSS_BASE}/feeds/all.rss'], f'WeRSS：{info}'
+    return None, [], '无可用后端'
+
+
+def fetch_rss_items(urls, backend):
+    """从一组 RSS 地址拉取并解析条目。"""
     items = []
-    for it in root.iter('item'):
-        title = (it.findtext('title') or '').strip()
-        link = (it.findtext('link') or '').strip()
-        pub = parse_date(it.findtext('pubDate') or '')
-        desc = strip_html(it.findtext('description') or '')
-        # 公众号名通常在 feed title 或 author
-        mp = (it.findtext('{http://purl.org/dc/elements/1.1/}creator') or '').strip()
-        if not mp:
-            feed_title = (root.findtext('.//channel/title') or '').strip()
-            mp = feed_title.replace('- WeRSS', '').replace('-', '').strip()
-
-        if not title or not link:
+    for url in urls:
+        txt = fetch(url)
+        if not txt:
             continue
-        items.append({'title': title, 'link': link, 'date': pub,
-                      'desc': desc, 'mp': mp or '微信公众号'})
+        try:
+            root = ElementTree.fromstring(txt)
+        except Exception:
+            continue
+        channel_title = (root.findtext('.//channel/title') or '').strip()
+        for it in root.iter('item'):
+            title = (it.findtext('title') or '').strip()
+            link = (it.findtext('link') or '').strip()
+            pub = parse_date(it.findtext('pubDate') or '')
+            desc = strip_html(it.findtext('description') or '')
+            mp = (it.findtext('{http://purl.org/dc/elements/1.1/}creator') or '').strip()
+            if not mp:
+                mp = re.sub(r'\s*-\s*(WeRSS|Wechat2RSS).*$', '', channel_title).strip()
+            if title and link:
+                items.append({'title': title, 'link': link, 'date': pub,
+                              'desc': desc, 'mp': mp or '微信公众号'})
     return items
+
+
+# 关注的公众号（按名称关键词匹配 wechat2rss 收录索引）
+# 说明：wechat2rss 免费服务只能取其已收录的公众号，无法自行添加。
+# 若某公众号不在其列表中，会在运行时提示"未收录"。
+WATCH_KEYWORDS = [
+    '武汉大学', '武大', '珞珈', '武大新闻网', '武大研究生',
+    '武大教务', '武大团委', '武大招聘', '武大图书馆',
+]
 
 
 def collect(since):
     """采集公众号文章，返回统一格式的条目列表。"""
-    ok, info = check_werss()
-    if not ok:
-        print(f'    [公众号] WeRSS 不可达({WERSS_BASE})，跳过')
+    backend, urls, info = detect_backend()
+    if backend is None:
+        print('    [公众号] 未探测到可用后端，跳过')
+        print(f'    [公众号] 提示：可用 MP_RSS_URL 环境变量直接指定 RSS 地址')
         return []
 
-    raw = fetch_feed_items()
+    print(f'    [公众号] 后端={backend}（{info}）')
+
+    if backend == 'wechat2rss':
+        idx = load_w2r_index()
+        if not idx:
+            print('    [公众号] 收录索引拉取失败')
+            return []
+        urls = []
+        hit = []
+        for kw in WATCH_KEYWORDS:
+            for name, u in idx.items():
+                if kw in name and u not in urls:
+                    urls.append(u)
+                    hit.append(name)
+        if not urls:
+            print(f'    [公众号] wechat2rss 未收录目标公众号（共收录 {len(idx)} 个）')
+            print('    [公众号] 该免费服务只收录技术/安全类公众号，武大不在其中')
+            print('    [公众号] 若需任意公众号，请改用 WeRSS 或微信读书方案')
+            return []
+        print(f'    [公众号] 命中 {len(hit)} 个：{"、".join(hit[:5])}{"..." if len(hit) > 5 else ""}')
+
+    raw = fetch_rss_items(urls, backend)
     if not raw:
-        print('    [公众号] 未获取到文章（可能还未订阅任何公众号）')
+        print('    [公众号] 未获取到文章')
         return []
 
     out = []
@@ -218,15 +329,40 @@ SOURCE_NAME = '微信公众号（经 WeRSS）'
 
 
 if __name__ == '__main__':
+    sys = __import__('sys')
     days = 60
-    if '--days' in __import__('sys').argv:
-        days = int(__import__('sys').argv[__import__('sys').argv.index('--days') + 1])
+    if '--days' in sys.argv:
+        days = int(sys.argv[sys.argv.index('--days') + 1])
     since = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
-    print(f'采集公众号文章，回溯至 {since}')
-    ok, info = check_werss()
-    print(f'WeRSS 状态：{"✅" if ok else "❌"} {info or f"不可达（{WERSS_BASE}）"}')
-    if ok:
-        items = collect(since)
-        print(f'\n共{len(items)} 条')
-        for i in items[:5]:
+
+    print('=' * 54)
+    print('微信公众号采集适配器')
+    print('=' * 54)
+    print(f'指定后端：{MP_BACKEND}')
+    print(f'回溯天数：{days}（自 {since} 起）')
+    print()
+
+    backend, urls, info = detect_backend()
+    if backend is None:
+        print('后端探测：❌ 未发现可用后端')
+        print()
+        print('可选方案：')
+        print('  1. 直接指定 RSS 地址（最简单）：')
+        print('     set MP_RSS_URL=https://example.com/feed.xml')
+        print('  2. 部署 WeRSS（支持任意公众号，需扫码）：')
+        print('     set MP_BACKEND=werss && set WERSS_BASE=http://localhost:8001')
+        print('  3. 部署微信读书反向订阅（支持任意公众号，无需微信扫码）：')
+        print('     set MP_BACKEND=weread && set WEREAD_BASE=http://localhost:4000')
+        sys.exit(1)
+
+    print(f'后端探测：✅ {backend} —— {info}')
+    print()
+    items = collect(since)
+    print()
+    if items:
+        print(f'共{len(items)} 条：')
+        for i in items[:8]:
             print(f"  [{i['d']}] [{i['c']}/{i['lv']}级/{i['aud']}] {i['t'][:40]}")
+    else:
+        print('未采集到文章。')
+    print('=' * 54)
