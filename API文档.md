@@ -5,6 +5,33 @@
 
 ---
 
+## 🟢 线上地址（可直接调用）
+
+```
+https://whu-campus-news.app.workbuddy.host
+```
+
+任何人都可以直接访问，无需部署、无需注册、无需 Key。试试看：
+
+```bash
+curl "https://whu-campus-news.app.workbuddy.host/api/notices?page_size=3"
+```
+
+| 接口 | 线上地址 |
+|---|---|
+| 服务索引 | `/` |
+| 健康检查 | `/api/health` |
+| 资讯列表 | `/api/notices` |
+| 资讯详情 | `/api/notices/{id}` |
+| 分类计数 | `/api/categories` |
+| 来源统计 | `/api/sources` |
+| 搜索 | `/api/search?q=关键词` |
+| 统计 | `/api/stats` |
+
+> 中文关键词记得URL 编码，或直接在浏览器地址栏输入（浏览器会自动编码）。
+
+---
+
 ## 一、快速开始
 
 ```bash

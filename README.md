@@ -33,6 +33,15 @@ python api.py     # http://localhost:8000
 
 要求：Python 3.7+，无需任何第三方库。
 
+### 线上地址（无需部署，直接可访问）
+
+| 类型 | 地址 |
+|---|---|
+| 🟢 **API** | `https://whu-campus-news.app.workbuddy.host/api/notices` |
+| 🟢 **网站** | `https://whu-campus-news.app.workbuddy.host/` |
+
+任何人可直接调用，无需注册与 API Key。
+
 ---
 
 ## 项目结构
