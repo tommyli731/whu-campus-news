@@ -1,0 +1,83 @@
+# ============================================================
+#武汉大学校园资讯聚合 - Git 忽略规则
+# ============================================================
+
+# ---- 密钥与环境变量（绝对不要提交）----
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+secrets/
+config.local.*
+!config.example.*
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ---- 虚拟环境 ----
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# ---- 测试与缓存 ----
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ---- 日志 ----
+*.log
+logs/
+npm-debug.log*
+
+# ---- 编辑器 / IDE ----
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ---- 临时文件 ----
+*.tmp
+*.temp
+*.bak
+tmp/
+temp/
+
+# ---- 运行时产物 ----
+# 采集状态（含已抓取条目标识，属运行态数据）
+crawler/data/state.json
+# 采集输出：data_news.json 是数据快照，可提交以便部署与回溯
+# 如不希望提交，取消下一行注释
+# data_news.json
+
+# ---- 发布平台标记 ----
+# .wbapp_*.genie 为发布平台生成的应用标识，属本机环境信息
+.wbapp_*.genie
+
+# ---- 平台内部目录 ----
+# .workbuddy 为工作台平台的内部数据（记忆、配置），与项目代码无关
+.workbuddy/
+
+# ---- 系统文件 ----
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ---- 注意 ----
+# 本项目零第三方依赖，不需要 node_modules / package-lock.json

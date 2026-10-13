@@ -1,0 +1,906 @@
+openapi: 3.0.3
+
+info:
+  title: 武汉大学校园资讯聚合 API
+  version: 1.0.0
+  description: |
+    提供武汉大学各官方渠道（主站、新闻网等）资讯的查询接口。
+
+    **数据来源**：武汉大学主站通知公告栏、新闻网（武大要闻 / 综合新闻 / 学术动态 /
+    珞珈人物 / 缤纷校园 / 媒体武大），由采集脚本定时抓取公开页面生成。
+
+    **内容版权**：所有资讯版权归原发布单位所有，接口返回的 `url` 字段为原文链接，
+    使用方应优先引用原文并注明出处。
+
+    **响应约定**：所有接口返回 JSON，统一包含 `success` 字段与 `request_id`（便于日志排查）。
+    失败时 `success` 为 `false`，并携带 `error` 对象，包含 `code`、`message`，部分含 `detail`。
+  contact:
+    name: 武汉大学校园资讯聚合（非官方第三方工具）
+  license:
+    name: 仅供学习交流使用
+
+servers:
+  - url: http://localhost:8000
+    description: 本地开发服务器
+  - url: http://127.0.0.1:8000
+    description: 本地回环地址
+
+tags:
+  - name: 系统
+    description: 健康检查与服务信息
+  - name: 资讯
+    description: 资讯查询接口
+  - name: 元数据
+    description: 分类、来源与统计
+
+security:
+  - ApiKeyAuth: []
+  - {}
+
+paths:
+  /api/health:
+    get:
+      tags: [系统]
+      summary: 健康检查
+      description: 检查服务运行状态与数据可用性。无需鉴权。
+      operationId: getHealth
+      responses:
+        '200':
+          description: 服务正常
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Health'
+                  request_id:
+                    type: string
+                    description: 请求追踪 ID
+                    example: 267caa29951f
+              examples:
+                success:
+                  summary: 正常响应
+                  value:
+                    success: true
+                    data:
+                      status: ok
+                      version: 1.0.0
+                      data_available: true
+                      item_count: 57
+                      data_updated_at: '2026-10-13 12:24'
+                      uptime_seconds: 7.0
+                      auth_required: false
+                      server_time: '2026-10-13 14:18:14'
+                    request_id: 267caa29951f
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/notices:
+    get:
+      tags: [资讯]
+      summary: 获取资讯列表
+      description: |
+        支持按分类、受众、重要度、来源、日期范围筛选，支持关键词搜索与四种排序。
+
+        **受众筛选规则**：`audience=stu` 返回「仅学生」与「师生通用」两类，
+        因为师生通用的资讯对学生同样有意义。
+      operationId: getNotices
+      parameters:
+        - name: category
+          in: query
+          description: 分类筛选
+          required: false
+          schema:
+            type: string
+            enum: [all, headline, academic, notice, college, activity, party]
+            default: all
+        - name: audience
+          in: query
+          description: 受众筛选
+          required: false
+          schema:
+            type: string
+            enum: [all, stu, tea, both]
+            default: all
+        - name: level
+          in: query
+          description: 重要度筛选
+          required: false
+          schema:
+            type: string
+            enum: [all, S, A, B]
+            default: all
+        - name: source
+          in: query
+          description: 来源名称精确筛选，取值见 GET /api/sources
+          required: false
+          schema:
+            type: string
+            example: 武汉大学新闻网
+        - name: since
+          in: query
+          description: 起始日期（含），格式 YYYY-MM-DD
+          required: false
+          schema:
+            type: string
+            format: date
+            example: '2026-10-01'
+        - name: until
+          in: query
+          description: 截止日期（含），格式 YYYY-MM-DD
+          required: false
+          schema:
+            type: string
+            format: date
+            example: '2026-10-31'
+        - name: q
+          in: query
+          description: 关键词，匹配标题、摘要、正文、发布机构、作者、栏目、来源
+          required: false
+          schema:
+            type: string
+            example: 讲座
+        - name: sort
+          in: query
+          description: 排序方式
+          required: false
+          schema:
+            type: string
+            enum: [date_desc, date_asc, level_desc, title_asc]
+            default: date_desc
+        - name: page
+          in: query
+          description: 页码，从 1 开始
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          description: 每页条数，上限 100
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/NoticeListResponse'
+                  request_id:
+                    type: string
+              examples:
+                basic:
+                  summary: 基础查询
+                  value:
+                    success: true
+                    data:
+                      total: 57
+                      page: 1
+                      page_size: 20
+                      total_pages: 3
+                      has_next: true
+                      filters:
+                        category: all
+                        audience: all
+                        level: all
+                        source: all
+                        since: null
+                        until: null
+                        keyword: ''
+                        sort: date_desc
+                      data_updated_at: '2026-10-13 12:24'
+                      items:
+                        - id: 4b9d12179943
+                          title: 珞珈讲坛第546讲预告
+                          date: '2026-10-13'
+                          category: notice
+                          category_label: 通知公告
+                          level: A
+                          audience: both
+                          audience_label: 师生通用
+                          source_name: 通知公告（主站栏）
+                          source_column: 通知公告
+                          summary: 珞珈讲坛第546讲预告
+                          url: https://www.whu.edu.cn/info/5231/276164.htm
+                filtered:
+                  summary: 组合筛选（学生向 + 学术 + S 级）
+                  value:
+                    success: true
+                    data:
+                      total: 3
+                      page: 1
+                      page_size: 20
+                      total_pages: 1
+                      has_next: false
+                      filters:
+                        category: academic
+                        audience: stu
+                        level: S
+                        source: all
+                        since: null
+                        until: null
+                        keyword: ''
+                        sort: date_desc
+                      items: []
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/DataUnavailable'
+
+  /api/notices/{id}:
+    get:
+      tags: [资讯]
+      summary: 获取资讯详情
+      description: 按 id 获取单条资讯的完整信息，含正文与完整来源信息。
+      operationId: getNoticeById
+      parameters:
+        - name: id
+          in: path
+          description: 资讯唯一标识
+          required: true
+          schema:
+            type: string
+          example: 4b9d12179943
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/NoticeDetail'
+                  request_id:
+                    type: string
+              examples:
+                success:
+                  summary: 详情响应
+                  value:
+                    success: true
+                    data:
+                      id: 4b9d12179943
+                      title: 月壤为何"承得住"又"易失稳"？武汉大学团队揭示凝集物调控月壤力学行为机制
+                      date: '2026-10-12'
+                      category: academic
+                      category_label: 学术讲座
+                      level: A
+                      audience: both
+                      audience_label: 师生通用
+                      source_name: 武汉大学新闻网
+                      source_column: 学术动态
+                      summary: 武汉大学教授王顺课题组在国际行星科学领域期刊发表论文。
+                      url: https://news.whu.edu.cn/info/1015/504877.htm
+                      content: 新闻网讯（通讯员水苑）近日，武汉大学教授王顺课题组……
+                      publisher: 科学技术发展研究院 / 武汉大学新闻网
+                      author: 通讯员 水苑
+                    request_id: a1b2c3d4e5f6
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: 资讯不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    success: false
+                    error:
+                      code: NOTICE_NOT_FOUND
+                      message: 未找到 id 为 nonexist 的资讯
+                      detail: 请通过 GET /api/notices 获取有效 id 列表。
+                    request_id: f1e2d3c4b5a6
+        '503':
+          $ref: '#/components/responses/DataUnavailable'
+
+  /api/categories:
+    get:
+      tags: [元数据]
+      summary: 获取分类列表及计数
+      description: 返回全部资讯分类及各分类下的条目数量。
+      operationId: getCategories
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                        example: 57
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CategoryCount'
+              examples:
+                success:
+                  value:
+                    success: true
+                    data:
+                      total: 57
+                      items:
+                        - { key: headline, label: 要闻速览, count: 18 }
+                        - { key: academic, label: 学术讲座, count: 17 }
+                        - { key: notice, label: 通知公告, count: 8 }
+                        - { key: college, label: 院系动态, count: 2 }
+                        - { key: activity, label: 文体活动, count: 9 }
+                        - { key: party, label: 党团思政, count: 3 }
+                    request_id: b1c2d3e4f5a6
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/DataUnavailable'
+
+  /api/sources:
+    get:
+      tags: [元数据]
+      summary: 获取信息来源列表
+      description: 按来源聚合统计，含各来源下的栏目分布与最新日期。返回值可用于筛选参数 `source`。
+      operationId: getSources
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                        example: 2
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/SourceGroup'
+              examples:
+                success:
+                  value:
+                    success: true
+                    data:
+                      total: 2
+                      items:
+                        - name: 武汉大学新闻网
+                          item_count: 49
+                          latest_date: '2026-10-13'
+                          columns:
+                            - { name: 学术动态, count: 17 }
+                            - { name: 武大要闻, count: 10 }
+                        - name: 通知公告（主站栏）
+                          item_count: 8
+                          latest_date: '2026-09-29'
+                          columns:
+                            - { name: 通知公告, count: 8 }
+                    request_id: c1d2e3f4a5b6
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/DataUnavailable'
+
+  /api/search:
+    get:
+      tags: [资讯]
+      summary: 关键词搜索
+      description: 在标题、摘要、正文、发布机构、作者、栏目、来源七个字段中做全文匹配（不区分大小写）。
+      operationId: searchNotices
+      parameters:
+        - name: q
+          in: query
+          description: 搜索关键词（必填）
+          required: true
+          schema:
+            type: string
+            minLength: 1
+          example: 讲座
+        - name: keyword
+          in: query
+          description: q 的别名，二选一使用
+          required: false
+          schema:
+            type: string
+        - name: page_size
+          in: query
+          description: 返回条数上限
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      keyword:
+                        type: string
+                      total:
+                        type: integer
+                      fields_searched:
+                        type: array
+                        items:
+                          type: string
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/NoticeBrief'
+              examples:
+                found:
+                  value:
+                    success: true
+                    data:
+                      keyword: 讲座
+                      total: 1
+                      fields_searched: [标题, 摘要, 正文, 发布机构, 作者, 栏目, 来源]
+                      items:
+                        - id: 4b9d12179943
+                          title: 珞珈讲坛第546讲预告
+                          date: '2026-10-13'
+                          category: notice
+                          category_label: 通知公告
+                          level: A
+                          audience: both
+                          audience_label: 师生通用
+                          source_name: 通知公告（主站栏）
+                          source_column: 通知公告
+                          summary: 珞珈讲坛第546讲预告
+                          url: https://www.whu.edu.cn/info/5231/276164.htm
+                empty:
+                  value:
+                    success: true
+                    data:
+                      keyword: 不存在的词
+                      total: 0
+                      fields_searched: [标题, 摘要, 正文, 发布机构, 作者, 栏目, 来源]
+                      items: []
+        '400':
+          description: 缺少必填参数
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missingQ:
+                  value:
+                    success: false
+                    error:
+                      code: MISSING_PARAM
+                      message: 缺少必填参数 q
+                      detail: 用法：GET /api/search?q=讲座
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/DataUnavailable'
+
+  /api/stats:
+    get:
+      tags: [元数据]
+      summary: 获取数据统计
+      description: 返回总条目数、日期区间及按分类/重要度/受众的分布统计。
+      operationId: getStats
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/Stats'
+              examples:
+                success:
+                  value:
+                    success: true
+                    data:
+                      total: 57
+                      date_range:
+                        from: '2026-08-14'
+                        to: '2026-10-13'
+                      updated_at: '2026-10-13 12:24'
+                      by_category:
+                        - { key: headline, label: 要闻速览, count: 18 }
+                      by_level:
+                        - { level: S, label: 重要（权威发布口）, count: 7 }
+                      by_audience:
+                        - { key: both, label: 师生通用, count: 39 }
+                      source_count: 2
+                    request_id: d1e2f3a4b5c6
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '503':
+          $ref: '#/components/responses/DataUnavailable'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: |
+        **鉴权说明**
+
+        本API 采用可选鉴权模式：
+
+        - 服务端**未配置** `API_KEY` 环境变量时 → 不校验，公开可访问
+        - 服务端**已配置** `API_KEY` 时 → 所有 `/api/*` 请求均需校验
+
+        传递方式（二选一）：
+        1. 请求头：`X-API-Key: <your-key>`
+        2. 查询参数：`?api_key=<your-key>`（便于浏览器调试，生产环境建议用请求头）
+
+        **服务端配置方式**：
+        - Windows：`set API_KEY=your-secret && python api.py`
+        - Linux / macOS：`export API_KEY=your-secret && python api.py`
+        - Docker：`docker run -e API_KEY=your-secret -p 8000:8000 ...`
+
+        建议生产环境务必配置，避免接口被滥用。
+
+  responses:
+    BadRequest:
+      description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            invalidCategory:
+              summary: 分类参数非法
+              value:
+                success: false
+                error:
+                  code: INVALID_PARAM
+                  message: category 取值非法: bad
+                  detail: 可选值：all, headline, academic, notice, college, activity, party
+            invalidDate:
+              summary: 日期格式错误
+              value:
+                success: false
+                error:
+                  code: INVALID_PARAM
+                  message: since 日期格式非法: 2026/10/01
+                  detail: 应为 YYYY-MM-DD，例如 2026-10-01。
+            invalidPage:
+              summary: 分页参数错误
+              value:
+                success: false
+                error:
+                  code: INVALID_PARAM
+                  message: page 或 page_size 不是合法整数
+                  detail: page ≥ 1，page_size 取值 1~100。
+    Unauthorized:
+      description: 未授权（仅在服务端配置了 API_KEY 时出现）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            noKey:
+              value:
+                success: false
+                error:
+                  code: UNAUTHORIZED
+                  message: 缺少或错误的 API Key
+                  detail: 请在请求头携带 X-API-Key: <your-key>，或在查询参数附加 ?api_key=<your-key>。服务未配置 API_KEY 环境变量时不校验。
+    DataUnavailable:
+      description: 数据不可用（尚未运行采集脚本）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            noData:
+              value:
+                success: false
+                error:
+                  code: DATA_UNAVAILABLE
+                  message: 资讯数据暂不可用
+                  detail: 请先运行 python update.py 生成 data_news.json。
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [success, error]
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: 机器可读的错误码
+              enum:
+                - INVALID_PARAM
+                - MISSING_PARAM
+                - UNAUTHORIZED
+                - NOT_FOUND
+                - NOTICE_NOT_FOUND
+                - DATA_UNAVAILABLE
+                - INTERNAL_ERROR
+            message:
+              type: string
+              description: 人类可读的错误描述
+            detail:
+              type: string
+              description: 补充说明（可选）
+        request_id:
+          type: string
+          description: 请求追踪 ID
+
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+          example: ok
+        version:
+          type: string
+          example: 1.0.0
+        data_available:
+          type: boolean
+          example: true
+        item_count:
+          type: integer
+          example: 57
+        data_updated_at:
+          type: string
+          nullable: true
+          example: '2026-10-13 12:24'
+        uptime_seconds:
+          type: number
+          example: 7.0
+        auth_required:
+          type: boolean
+          example: false
+        server_time:
+          type: string
+          example: '2026-10-13 14:18:14'
+
+    NoticeBrief:
+      type: object
+      description: 列表项（精简字段）
+      properties:
+        id:
+          type: string
+          example: 4b9d12179943
+        title:
+          type: string
+          example: 珞珈讲坛第546讲预告
+        date:
+          type: string
+          format: date
+          example: '2026-10-13'
+        category:
+          type: string
+          enum: [headline, academic, notice, college, activity, party]
+        category_label:
+          type: string
+          example: 通知公告
+        level:
+          type: string
+          enum: [S, A, B]
+          description: S=重要（权威发布口），A=较重要，B=常规
+        audience:
+          type: string
+          enum: [stu, tea, both]
+        audience_label:
+          type: string
+          example: 师生通用
+        source_name:
+          type: string
+          description: 来源渠道名称
+          example: 武汉大学新闻网
+        source_column:
+          type: string
+          description: 来源栏目名称
+          example: 学术动态
+        summary:
+          type: string
+          description: 摘要，最长 160 字
+        url:
+          type: string
+          format: uri
+          description: 原文链接
+
+    NoticeDetail:
+      allOf:
+        - $ref: '#/components/schemas/NoticeBrief'
+        - type: object
+          properties:
+            content:
+              type: string
+              description: 正文内容
+            publisher:
+              type: string
+              description: 发布机构
+              example: 科学技术发展研究院 / 武汉大学新闻网
+            author:
+              type: string
+              description: 作者 /通讯员
+              example: 通讯员 水苑
+
+    NoticeListResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: 符合条件的总条数
+          example: 57
+        page:
+          type: integer
+          example: 1
+        page_size:
+          type: integer
+          example: 20
+        total_pages:
+          type: integer
+          example: 3
+        has_next:
+          type: boolean
+          example: true
+        filters:
+          type: object
+          description: 本次请求实际生效的筛选条件
+          properties:
+            category:
+              type: string
+            audience:
+              type: string
+            level:
+              type: string
+            source:
+              type: string
+            since:
+              type: string
+              nullable: true
+            until:
+              type: string
+              nullable: true
+            keyword:
+              type: string
+            sort:
+              type: string
+        data_updated_at:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/NoticeBrief'
+
+    CategoryCount:
+      type: object
+      properties:
+        key:
+          type: string
+          enum: [headline, academic, notice, college, activity, party]
+        label:
+          type: string
+          example: 要闻速览
+        count:
+          type: integer
+          example: 18
+
+    SourceGroup:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 武汉大学新闻网
+        item_count:
+          type: integer
+          example: 49
+        latest_date:
+          type: string
+          format: date
+        columns:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              count:
+                type: integer
+
+    Stats:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 57
+        date_range:
+          type: object
+          nullable: true
+          properties:
+            from:
+              type: string
+              format: date
+            to:
+              type: string
+              format: date
+        updated_at:
+          type: string
+        by_category:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              label:
+                type: string
+              count:
+                type: integer
+        by_level:
+          type: array
+          items:
+            type: object
+            properties:
+              level:
+                type: string
+              label:
+                type: string
+              count:
+                type: integer
+        by_audience:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              label:
+                type: string
+              count:
+                type: integer
+        source_count:
+          type: integer
+          example: 2

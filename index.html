@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>武汉大学校园资讯聚合</title>
+<meta name="description" content="武汉大学校园资讯聚合：汇总学校及各院系官网、官方微信公众号与新媒体发布的资讯，按学生与教师视角分开呈现，支持时间线浏览、分类筛选与来源追溯。">
+<meta name="keywords" content="武汉大学,校园资讯,武大,通知公告,学术讲座,珞珈讲坛,院系动态">
+<meta name="author" content="武汉大学校园资讯聚合（非官方第三方工具）">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#6b2c7f">
+<meta property="og:type" content="website">
+<meta property="og:title" content="武汉大学校园资讯聚合">
+<meta property="og:description" content="跨官网、公众号与官方新媒体，按学生与教师视角分开展示，重要消息不再错过。">
+<meta property="og:locale" content="zh_CN">
+<meta name="twitter:card" content="summary">
+<link rel="canonical" href="./index.html">
+<meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+<meta name="referrer" content="no-referrer-when-downgrade">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--ink:#1a1a1a;--sub:#5f5e5a;--line:#e5e3dd;--bg:#faf9f7;--card:#fff;--brand:#6b2c7f;--stu:#185fa5;--tea:#8a5a20}
+.tag{font-size:11px;padding:2px 8px;border-radius:4px;display:inline-block;white-space:nowrap}
+.t-S{background:#fceceb;color:#a32d2d}
+.t-A{background:#e6f1fb;color:#185fa5}
+.t-B{background:#f1efe8;color:#5f5e5a}
+.c-headline{background:#fbeaf0;color:#993556}
+.c-academic{background:#eeedfe;color:#534ab7}
+.c-notice{background:#faeeda;color:#854f0b}
+.c-college{background:#e6f1fb;color:#185fa5}
+.c-activity{background:#eaf3de;color:#3b6d11}
+.c-party{background:#fceceb;color:#a32d2d}
+.a-stu{background:#e6f1fb;color:#185fa5;border:1px solid #b5d4f4}
+.a-tea{background:#fdf3e2;color:#8a5a20;border:1px solid #fac775}
+.a-all{background:#f1efe8;color:#5f5e5a;border:1px solid #d3d1c7}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--ink);background:var(--bg);line-height:1.6}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+header{background:var(--brand);color:#fff;padding:28px 0 22px}
+header .logo{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.logo-mark{width:42px;height:42px;background:#fff;color:var(--brand);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;flex-shrink:0}
+header h1{font-size:22px;font-weight:600;letter-spacing:.5px}
+header .sub{font-size:13px;opacity:.85;margin-top:2px}
+.searchrow{display:flex;gap:10px;margin-top:6px}
+.searchrow input{flex:1;padding:11px 16px;border:none;border-radius:8px;font-size:14px;outline:none}
+.btn{padding:11px 22px;background:#fff;color:var(--brand);border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn:hover{opacity:.92}
+nav{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+nav .wrap{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav .wrap::-webkit-scrollbar{display:none}
+nav a{padding:14px 16px;font-size:14px;color:var(--sub);text-decoration:none;white-space:nowrap;border-bottom:2px solid transparent}
+nav a:hover,nav a.on{color:var(--brand);border-bottom-color:var(--brand);font-weight:500}
+main{padding:28px 0 60px}
+.layout{display:grid;grid-template-columns:1fr 320px;gap:28px;align-items:start}
+h2.sec{font-size:17px;font-weight:600;margin:0 0 14px;padding-left:11px;border-left:3px solid var(--brand)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:14px}
+.audtabs{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap}
+.audtab{flex:1;min-width:150px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 18px;cursor:pointer;text-align:left;transition:.15s}
+.audtab:hover{border-color:var(--brand)}
+.audtab .an{font-size:15px;font-weight:600;display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.audtab .ad{font-size:12px;color:var(--sub)}
+.audtab.on{border-color:var(--brand);background:#faf6fc;box-shadow:0 0 0 1px var(--brand) inset}
+.audtab.on .an{color:var(--brand)}
+.audico{width:22px;height:22px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:12px;color:#fff;flex-shrink:0}
+.i-stu{background:var(--stu)}
+.i-tea{background:var(--tea)}
+.i-all{background:#5f5e5a}
+.hero{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.hero .top{padding:26px 24px 22px;border-bottom:1px solid var(--line)}
+.hero .kicker{font-size:12px;color:var(--brand);font-weight:600;letter-spacing:1px;margin-bottom:8px}
+.hero h3{font-size:24px;line-height:1.4;font-weight:600;margin-bottom:10px;cursor:pointer}
+.hero p{color:var(--sub);font-size:14px}
+.meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--sub);margin-top:10px}
+.src{color:#8a8985}
+.src a{color:var(--brand);text-decoration:none}
+.src a:hover{text-decoration:underline}
+.srcline{font-size:11.5px;color:#8a8985;margin-top:5px;line-height:1.55}
+.list .it{padding:16px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.list .it:last-child{border-bottom:none;padding-bottom:0}
+.list .it:first-child{padding-top:0}
+.list h4{font-size:16px;font-weight:500;margin-bottom:7px;line-height:1.5}
+.list .it:hover h4{color:var(--brand)}
+.deadline{background:#fceceb;color:#a32d2d;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}
+aside .box{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
+aside .box h3{font-size:14px;font-weight:600;margin-bottom:12px}
+.daily{background:linear-gradient(135deg,#f4eef7,#eef4fa);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
+.daily h3{font-size:14px;font-weight:600;margin-bottom:6px;color:var(--brand)}
+.daily p{font-size:13px;color:var(--sub)}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{padding:5px 11px;background:#fff;border:1px solid var(--line);border-radius:14px;font-size:12px;color:var(--sub);cursor:pointer}
+.chip:hover{border-color:var(--brand);color:var(--brand)}
+.chip.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.filterbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px}
+.filterbar input,.filterbar select{padding:9px 14px;border:1px solid var(--line);border-radius:8px;font-size:14px;outline:none;background:#fff;color:var(--ink)}
+.filterbar input{flex:1;min-width:170px}
+.fb-l{font-size:12px;color:var(--sub);margin-right:-4px}
+.cnt{font-size:12px;color:var(--sub);margin-left:auto}
+.tl-day{margin-bottom:8px}
+.tl-date{font-size:13px;font-weight:600;color:var(--brand);padding:10px 0;display:flex;align-items:center;gap:10px}
+.tl-date .ln{flex:1;height:1px;background:var(--line)}
+.tl-date .n{font-size:11px;color:var(--sub);background:var(--bg);padding:1px 8px;border-radius:10px;font-weight:400}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:11px 10px;background:var(--bg);font-weight:600;font-size:12px;color:var(--sub);border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:hover td{background:#faf9f7}
+.tblwrap{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:12px}
+a.ext{color:var(--brand);text-decoration:none;font-size:12px}
+/* 外链图标统一规格：12px 紧凑 viewBox + 基线对齐，避免缩放发糊 */
+svg.ico{width:12px;height:12px;flex:0 0 auto;display:inline-block;vertical-align:-2px}
+a.ext svg.ico{vertical-align:-2px;margin:0 1px}
+/* 详情页长链接：允许断行，不撑破网格 */
+.urllink{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;line-height:1.7}
+.urllink .u{word-break:break-all;min-width:0}
+/* 来源行内的原文链接：图标与文字基线协调 */
+.srcline a{display:inline-flex;align-items:center;gap:3px;line-height:1.55}
+a.ext:hover{text-decoration:underline}
+footer{background:#fff;border-top:1px solid var(--line);padding:24px 0;font-size:12px;color:var(--sub)}
+.back{color:var(--brand);cursor:pointer;font-size:14px;margin-bottom:16px;display:inline-block}
+.hide{display:none!important}
+.empty{text-align:center;padding:56px 20px;color:var(--sub)}
+.empty .ei{width:46px;height:46px;border-radius:50%;background:#f1efe8;color:#b4b2a9;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 14px}
+.empty h4{font-size:15px;color:var(--ink);font-weight:600;margin-bottom:6px}
+.empty p{font-size:13px;margin-bottom:14px}
+.empty button{padding:8px 18px;background:#fff;border:1px solid var(--line);border-radius:8px;font-size:13px;color:var(--brand);cursor:pointer}
+.empty button:hover{border-color:var(--brand)}
+.abbr{background:var(--bg);border-left:3px solid var(--brand);padding:14px 16px;margin:16px 0;font-size:14px;color:var(--sub);border-radius:0 6px 6px 0}
+.article h1{font-size:26px;line-height:1.4;font-weight:600;margin-bottom:14px}
+.article .body{margin-top:20px;font-size:15px;line-height:1.9}
+.article .body p{margin-bottom:14px}
+.srcbox{background:#f7f6f4;border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-top:22px}
+.srcbox h4{font-size:13px;font-weight:600;margin-bottom:10px;color:var(--brand)}
+.srcbox dl{display:grid;grid-template-columns:76px 1fr;gap:7px 12px;font-size:13px;margin:0}
+.srcbox dt{color:var(--sub);font-size:12px}
+.srcbox dd{margin:0}
+.extmark{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:#8a8985;border:1px solid var(--line);border-radius:4px;padding:1px 6px;background:#fff;white-space:nowrap;text-decoration:none}
+.extmark:hover{border-color:var(--brand);color:var(--brand);text-decoration:none}
+.extmark svg{width:12px;height:12px;flex-shrink:0;vertical-align:-2px;display:block}
+.linkbtn{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--brand);text-decoration:none;border:1px solid var(--brand);border-radius:6px;padding:4px 10px;background:#fff;transition:.15s}
+.linkbtn:hover{background:var(--brand);color:#fff}
+.linkbtn svg{width:12px;height:12px;flex-shrink:0;display:block}
+.srcgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.srccard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;display:flex;flex-direction:column;transition:.15s}
+.srccard:hover{border-color:var(--brand);box-shadow:0 2px 8px rgba(107,44,127,.07)}
+.srchd{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+.srchd h4{font-size:15px;font-weight:600;line-height:1.4;cursor:pointer}
+.srchd h4:hover{color:var(--brand)}
+.typetag{font-size:11px;padding:2px 8px;border-radius:4px;background:#f4eef7;color:var(--brand);white-space:nowrap;flex-shrink:0}
+.srcunit{font-size:12px;color:var(--sub);margin-bottom:10px}
+.srcdesc{font-size:13px;color:var(--sub);line-height:1.7;margin-bottom:12px;flex:1}
+.srcscope{background:#faf9f7;border-left:2px solid var(--brand);padding:9px 11px;border-radius:0 6px 6px 0;font-size:12px;color:var(--sub);margin-bottom:13px;line-height:1.65}
+.srcfoot{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--line)}
+.linkbtn.ghost{border-color:var(--line);color:var(--sub)}
+.linkbtn.ghost:hover{border-color:var(--brand);background:#faf6fc;color:var(--brand)}
+.srclink{cursor:pointer;color:var(--brand);font-size:11px;text-decoration:none;border-bottom:1px dotted currentColor}
+.srclink:hover{color:#8f3fa8}
+.mask{position:fixed;inset:0;background:rgba(26,26,26,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+.mbox{background:#fff;border-radius:14px;max-width:640px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.mhd{padding:22px 24px 18px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;justify-content:space-between;gap:14px;position:sticky;top:0;background:#fff;border-radius:14px 14px 0 0;z-index:2}
+.mhd h3{font-size:19px;font-weight:600;line-height:1.4;padding-right:10px}
+.mclose{background:none;border:none;font-size:24px;color:var(--sub);cursor:pointer;line-height:1;padding:0 4px;flex-shrink:0}
+.mclose:hover{color:var(--ink)}
+.mbd{padding:20px 24px 24px}
+.mrow{margin-bottom:16px}
+.mrow:last-child{margin-bottom:0}
+.mrow .lb{font-size:11px;color:var(--sub);letter-spacing:.6px;margin-bottom:5px}
+.mrow .vl{font-size:14px;line-height:1.75}
+.mscope{background:#faf9f7;border-left:2px solid var(--brand);padding:11px 13px;border-radius:0 6px 6px 0;font-size:13px;color:var(--sub);line-height:1.7}
+.mfoot{padding-top:16px;border-top:1px solid var(--line);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.mobilenav{display:none}
+@media(max-width:900px){
+.layout{grid-template-columns:1fr}
+aside{display:none}
+.mobilenav{display:flex;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);z-index:100;padding:8px 0}
+.mobilenav a{flex:1;text-align:center;font-size:11px;color:var(--sub);text-decoration:none;padding:4px 0}
+.mobilenav .mi{font-size:17px;display:block;margin-bottom:2px}
+main{padding-bottom:80px}
+.hero h3{font-size:20px}
+.article h1{font-size:21px}
+.audtabs{flex-direction:column}
+.srcbox dl{grid-template-columns:66px 1fr}
+.srcgrid{grid-template-columns:1fr}
+.mask{padding:14px;align-items:flex-start}
+.mbox{max-height:92vh}
+.mhd{padding:18px 18px 14px}
+.mhd h3{font-size:17px}
+.mbd{padding:16px 18px 20px}
+}
+@media(max-width:600px){
+.wrap{padding:0 15px}
+header h1{font-size:18px}
+.searchrow{flex-direction:column}
+.btn{width:100%}
+.card{padding:16px}
+.audtab{padding:14px}
+.srchd{flex-direction:column;gap:6px}
+.linkbtn{font-size:11px;padding:5px 8px;gap:4px}
+.linkbtn svg.ico{width:11px;height:11px}
+}
+</style>
+</head>
+<body>
+
+<header>
+<div class="wrap">
+<div class="logo">
+<div class="logo-mark">珞</div>
+<div><h1>武汉大学校园资讯聚合</h1><div class="sub">跨官网 · 公众号 · 官方新媒体，按学生与教师视角分开呈现</div></div>
+</div>
+<div class="searchrow">
+<input id="q" placeholder="搜索标题、摘要、来源栏目或发布机构…">
+<button class="btn" onclick="doSearch()">搜索</button>
+</div>
+</div>
+</header>
+
+<nav><div class="wrap" id="nav">
+<a href="#" class="on" data-p="home">首页</a>
+<a href="#" data-p="student">学生资讯</a>
+<a href="#" data-p="teacher">教师资讯</a>
+<a href="#" data-p="timeline">时间线</a>
+<a href="#" data-p="sources">资讯来源</a>
+<a href="#" data-p="channels">渠道清单</a>
+<a href="#" data-p="about">关于</a>
+</div></nav>
+
+<div id="modal"></div>
+
+<main class="wrap" id="main"></main>
+
+<footer><div class="wrap">
+<div><strong>武汉大学校园资讯聚合</strong> · 第三方信息聚合工具，非官方产品</div>
+<div style="margin-top:6px">所有资讯版权归原发布单位所有。本站仅作原文摘录与索引，每条资讯均注明来源机构、栏目与原文链接。</div>
+<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)">
+ <strong>数据说明：</strong>数据来源 <span id="data-state">内置快照</span> ·最近更新 <span id="gen-time">—</span> ·覆盖区间 2026-10-01 起。资讯由采集脚本从各官方渠道自动获取，<strong>正式通知请以原文链接为准</strong>。
+</div>
+</div></footer>
+
+<div class="mobilenav" id="mn"></div>
+
+<script>
+const CATS={headline:"要闻速览",academic:"学术讲座",notice:"通知公告",college:"院系动态",activity:"文体活动",party:"党团思政"};
+const AUD={stu:"学生",tea:"教师"};
+
+// aud: stu=仅学生, tea=仅教师, both=两类均相关
+const NEWS=[
+{id:1,t:"祝福祖国！武汉大学举行国庆升旗仪式",d:"2026-10-01",c:"headline",lv:"S",aud:"both",
+ org:"党委宣传部 / 武汉大学新闻网",by:"记者 吴江龙",col:"武大要闻",url:"http://news.whu.edu.cn/info/1002/504577.htm",
+ s:"10月1日清晨，武汉大学师生代表齐聚行政楼前，隆重举行升旗仪式，共同庆祝中华人民共和国成立77周年。",
+ b:"新闻网讯10月1日清晨，武汉大学师生代表齐聚行政楼前，隆重举行升旗仪式，共同庆祝中华人民共和国成立77周年。仪式由国旗护卫队承担升旗任务，师生代表整齐列队，面向国旗肃立。上午，国歌响起，鲜艳的五星红旗在晨光中缓缓升起，现场师生肃立致以注目礼。升旗仪式是武汉大学重要的爱国主义教育载体，也是全校师生共同迎接重大节日的重要方式。仪式结束后，师生代表集体高呼口号，声势昂扬。本仪式由国旗护卫队负责升旗，师生代表共同参加，是全校性重要活动。"},
+{id:2,t:"【创新武大】张平文院士荣获第十一届苏步青应用数学奖",d:"2026-10-10",c:"academic",lv:"S",aud:"tea",
+ org:"科学技术发展研究院 / 武汉大学新闻网",by:"通讯员 遥轩",col:"创新武大",url:"http://news.whu.edu.cn/info/2301/504727.htm",
+ s:"苏步青应用数学奖旨在奖励在应用数学研究及推动应用数学发展方面做出杰出贡献的个人，属于终身成就奖，每届获奖者不超过2名，是我国应用数学领域的最高荣誉。",
+ b:"新闻网讯近日，第十一届苏步青应用数学奖揭晓，武汉大学张平文院士荣获该奖项。苏步青应用数学奖由中国工业与应用数学学会设立，每两年在学会年会开幕式上颁发，每届获奖者不超过2名，是我国应用数学领域的最高荣誉，旨在奖励在应用数学研究及推动应用数学发展方面做出杰出贡献的个人。张平文院士长期从事应用数学与计算科学研究，在微分方程数值方法、复杂系统模拟等方面取得了一系列重要成果。此次获奖体现了武大学者在应用数学领域的顶尖实力，可作为青年教师科研成长的重要标杆参考。"},
+{id:3,t:"月壤为何“承得住”又“易失稳”？武汉大学团队揭示凝集物调控月壤力学行为机制",d:"2026-10-12",c:"academic",lv:"A",aud:"both",
+ org:"科学技术发展研究院 / 武汉大学新闻网",by:"通讯员 水苑",col:"学术动态",url:"http://news.whu.edu.cn/info/1015/504877.htm",
+ s:"武汉大学教授王顺课题组在国际行星科学领域期刊Journal of Geophysical Research: Planets发表论文，武汉大学为第一署名单位。",
+ b:"新闻网讯近日，武汉大学教授王顺课题组在美国地球物理联合会（AGU）旗下国际行星科学领域期刊Journal of Geophysical Research: Planets发表研究论文，论文题为“High-Fidelity Lunar Mare Agglutinates and Their Mechanical Effects on Lunar Regolith Simulants”。王顺为论文第一作者和通讯作者，博士研究生滕越为第二作者，清华大学副教授崔一飞、博士研究生罗奥及武汉大学教授李典庆为共同作者。武汉大学为第一署名单位。该研究揭示了月壤颗粒在聚合过程中力学行为的调控机制，为理解月壤在复杂载荷下的稳定性提供了新方法。可作为本科生科研启蒙与研究生课题选择的参考案例。"},
+{id:4,t:"邹秀芬团队在肿瘤免疫空间模式的机理与数据融合建模研究中取得新进展",d:"2026-10-12",c:"academic",lv:"A",aud:"tea",
+ org:"科学技术发展研究院 / 武汉大学新闻网",by:"通讯员 数轩",col:"学术动态",url:"http://news.whu.edu.cn/info/1015/504887.htm",
+ s:"武汉大学数学与统计学院教授邹秀芬团队在PNAS发表论文，武汉大学为论文第一署名单位。",
+ b:"新闻网讯近日，武汉大学数学与统计学院教授邹秀芬团队在国际期刊《美国国家科学院院刊》（Proceedings of the National Academy of Sciences，PNAS）上发表最新研究论文，论文题为“Integrating tumor–immune mechanistic modeling with transcriptomics reveals pattern-driven prognostic biomarkers in tumors”。该工作由武汉大学、香港理工大学以及美国加州大学欧文分校等单位合作完成，武汉大学为论文第一署名单位。团队将肿瘤免疫机理建模与转录组数据深度融合，揭示了肿瘤免疫空间模式，识别出模式驱动的预后生物标志物，为肿瘤精准治疗提供了新思路。"},
+{id:5,t:"第三十八届珞珈金秋艺术节开幕",d:"2026-10-13",c:"activity",lv:"B",aud:"stu",
+ org:"党委宣传部 / 武汉大学新闻网",by:"记者团队",col:"缤纷校园",url:"https://news.whu.edu.cn/info/1007/504917.htm",
+ s:"第三十八届珞珈金秋艺术节开幕，为期近一个月的校园文化盛会正式启幕。",
+ b:"新闻网讯金秋十月，珞珈山草木染黄，第三十八届珞珈金秋艺术节开幕。本届艺术节以校园文化展示为核心，涵盖话剧、音乐会、舞蹈、书画、摄影等多种形式，将持续近一个月。艺术节是武汉大学最重要的校园文化品牌活动之一，每年吸引全校师生广泛参与，学生可通过院系团委、社团联合会等渠道报名观看或参与志愿服务。开幕式现场，气氛热烈，同学们在珞珈山间感受艺术的氛围。"},
+{id:6,t:"百日砺初心 筑梦启珞珈：18名新入职辅导员参加培训",d:"2026-10-13",c:"college",lv:"A",aud:"tea",
+ org:"学生工作部 / 武汉大学新闻网",by:"记者团队",col:"缤纷校园",url:"https://news.whu.edu.cn/info/1007/504927.htm",
+ s:"18名新入职辅导员参加为期百日的集中培训，开启学生工作职业生涯新阶段。",
+ b:"新闻网讯百日砺初心，筑梦启珞珈。10月13日，18名新入职辅导员参加为期百日的集中培训。学校学生工作部为新入职辅导员设计了系统的培养方案，通过百日集中培训，帮助他们尽快转变角色、熟悉校情、掌握育人方法。辅导员队伍是学生思想政治教育的主力军，本次培训体现了学校对学工队伍建设的重视，也反映了学校对青年教师职业成长的系统支持。"},
+{id:7,t:"银球飞舞，燃动珞珈（组图）",d:"2026-10-13",c:"activity",lv:"B",aud:"stu",
+ org:"体育部 / 武汉大学新闻网",by:"记者团队",col:"缤纷校园",url:"https://news.whu.edu.cn/info/1007/504947.htm",
+ s:"校园网球赛事火热进行，珞珈学子在银球飞舞中强健体魄、展现活力。",
+ b:"新闻网讯珞珈山下，银球飞舞。武汉大学校园网球比赛在激战正酣，来自各院系的学生运动员在赛场上挥洒汗水、奋勇拼搏。本次比赛吸引了众多同学到场观赛，场上选手们专注投入、奋力奔跑，展现出良好的竞技状态和体育精神，成为金秋校园里一道亮丽的风景线。感兴趣的同学可持续关注校体育部及各院系通知，参与下届赛事。"},
+{id:8,t:"科创有我，共建支点：武大青科突击队在岗位建功竞赛获佳绩",d:"2026-10-12",c:"college",lv:"A",aud:"stu",
+ org:"校团委 / 武汉大学新闻网",by:"记者团队",col:"珞珈人物",url:"http://news.whu.edu.cn/info/1013/504817.htm",
+ s:"武大青年科技突击队在岗位建功竞赛中获佳绩，展现青年科研报国风采。",
+ b:"新闻网讯近日，武大青年科技突击队在岗位建功竞赛中取得佳绩。青年科技突击队是武汉大学引导青年师生投身科技创新、服务国家战略的重要平台。队员们立足岗位、担当作为，把科研工作与国家需求相结合，在岗位上建功立业，展现了武大青年学子科技报国的时代风采。该平台面向在校学生开放招募，是本科生参与科研实践的重要渠道。"},
+{id:9,t:"《纵横山海 驰骋星河——李德仁院士的强国梦》新书发布会在武汉大学举行",d:"2026-10-12",c:"academic",lv:"A",aud:"both",
+ org:"科学技术发展研究院 / 武汉大学新闻网",by:"记者团队",col:"武大要闻",url:"http://news.whu.edu.cn/info/2281/504847.htm",
+ s:"李德仁院士新书发布会在武汉大学举行，讲述其矢志遥感、强军报国的奋斗历程。",
+ b:"新闻网讯10月12日，《纵横山海 驰骋星河——李德仁院士的强国梦》新书发布会在武汉大学举行。李德仁院士是我国雷达与卫星遥感领域的著名科学家，长期致力于测绘遥感事业。新书以“强国梦”为主线，讲述其矢志不渝、驰骋学术前沿的奋斗历程。发布会现场，与会师生聆听了李德仁院士的科研报国故事，深受鼓舞。该活动对青年教师与高年级本科生均具有较强的榜样教育意义，学生可通过新闻网及党委宣传部渠道关注后续场次。"},
+{id:10,t:"高智团队在国际小型无人机大赛中获多个奖项",d:"2026-10-10",c:"academic",lv:"A",aud:"tea",
+ org:"科学技术发展研究院 / 武汉大学新闻网",by:"通讯员 遥轩",col:"学术动态",url:"http://news.whu.edu.cn/info/1015/504757.htm",
+ s:"武汉大学教授高智团队与港中大、北理工联合组建的CWBLions团队获IMAV2026室外赛道冠军、室内赛道亚军。",
+ b:"新闻网讯第十七届国际小型无人机大赛（IMAV2026）近日在法国斯特拉斯堡举行。由武汉大学教授高智团队和香港中文大学院士Ben M. CHEN团队联合组建的CWBLions团队（C：香港中文大学、W：武汉大学、B：北京理工大学）获得室外赛道冠军、室内赛道亚军。IMAV是聚焦自主微型无人机领域的重要国际赛事，本届赛事吸引了来自德国、法国、西班牙等多个国家和地区的团队参加。"},
+{id:11,t:"“武汉一号”卫星助力国际团队在国际野火大赛夺冠",d:"2026-10-10",c:"academic",lv:"A",aud:"tea",
+ org:"科学技术发展研究院 / 武汉大学新闻网",by:"通讯员 遥轩",col:"学术动态",url:"http://news.whu.edu.cn/info/1015/504767.htm",
+ s:"以龚健雅院士团队为核心的SIRIUS国际联盟获XPRIZE空间野火探测与情报赛道全球第一。",
+ b:"新闻网讯2026年9月23日，XPRIZE国际野火大赛公布最终获奖名单。以武汉大学院士龚健雅团队为核心支撑的SIRIUS国际联盟，获得空间野火探测与情报赛道全球第一名。XPRIZE大赛是全球公认的最高规格科技创新赛事之一，由美国XPRIZE非营利基金会主办，聚焦气候、灾害、航天等人类重大难题。本届大赛周期为2023至2026年，吸引全球400余名参赛者。“武汉一号”卫星由武汉大学牵头研制，是学校空间信息领域的重要成果。"},
+{id:12,t:"【红色武大】我校新增两项教育部高校思政工作项目",d:"2026-10-10",c:"party",lv:"A",aud:"tea",
+ org:"党委宣传部 / 武汉大学新闻网",by:"记者团队",col:"红色武大",url:"http://news.whu.edu.cn/info/2281/504837.htm",
+ s:"学校新增两项教育部高校思政工作项目，思政工作品牌建设再获认可。",
+ b:"新闻网讯近日，教育部公布新增高校思想政治工作项目名单，武汉大学新增两项教育部高校思政工作项目。这两项项目的入选体现了学校思想政治工作建设成效获得教育部认可。学校长期坚持“三全育人”理念，不断加强和改进新时代高校思想政治工作。项目落地后将面向辅导员队伍与学生开展相关建设。"},
+{id:13,t:"湖北这支医师团队在国际舞台拿下“年度最佳”",d:"2026-10-08",c:"academic",lv:"A",aud:"tea",
+ org:"医学部 / 武汉大学新闻网",by:"记者 龙华 通讯员 於鑫益",col:"学术动态",url:"http://news.whu.edu.cn/info/1015/504657.htm",
+ s:"武大中南医院器官移植团队获国际移植学会全球大会年度最佳基础科学论文奖，为该奖首次颁给中国团队。",
+ b:"新闻网讯9月20日至23日，第31届国际移植学会全球大会（TTS2026）在澳大利亚悉尼举行。会上，武汉大学中南医院器官移植团队获颁TTS基础与转化科学委员会设立的莱斯利·布伦特奖（Leslie Brent Award）。这是该奖自2014年设立以来，首次颁给中国医师团队。莱斯利·布伦特奖是TTS颁发的年度最佳基础科学论文奖，专门表彰发表在国际移植学会期刊《Transplantation》上的优秀研究。"},
+{id:14,t:"【珞珈讲坛】J.N. Reddy院士分享计算力学领域前沿进展",d:"2026-10-08",c:"academic",lv:"B",aud:"both",
+ org:"科学技术发展研究院 / 土木建筑工程学院",by:"邀请人 黄群",col:"珞珈讲坛",url:"https://www.whu.edu.cn/info/5231/275164.htm",
+ s:"美国国家工程院院士J.N. Reddy做客珞珈讲坛，讲述计算力学前沿：有限体积法与有限单元法的融合之道。",
+ b:"新闻网讯珞珈讲坛第545讲于2026年9月24日在樱顶老图书馆举行，美国德克萨斯农工大学杰出教授J.N. Reddy院士主讲，题目为“计算力学前沿：有限体积法与有限单元法的融合之道”。Reddy教授是美国国家工程院、中国工程院、欧洲科学院等9院院士，著有25部专著，发表期刊论文850余篇，曾获铁摩辛柯奖章、冯·卡门奖章等国际大奖。本讲由土木建筑工程学院承办，邀请人黄群。该讲座对教师与本科生均开放，是难得的学术前沿交流机会。"},
+{id:15,t:"【红色武大】三代党员联学，银青共话初心",d:"2026-10-09",c:"party",lv:"B",aud:"tea",
+ org:"离退休工作处 / 武汉大学新闻网",by:"通讯员 文诗语",col:"红色武大",url:"http://news.whu.edu.cn/info/2281/504677.htm",
+ s:"离退休工作处联合珞珈银龄宣讲团、遥感学院赴周恩来故居开展联学活动。",
+ b:"新闻网讯为传承红色基因、赓续初心使命，武汉大学离退休工作处近日联合珞珈银龄宣讲团、遥感信息工程学院，在周恩来故居开展“银青共忆初心路”三代党员联学活动。来自离退休工作处、遥感信息工程学院的师生共同参加，赓续红色血脉，感悟初心使命。活动发挥离退休党员的育人作用，是青年教师党性教育的有效形式。"},
+{id:16,t:"【笃行武大】学校开展民族团结进步宣传周系列活动",d:"2026-10-08",c:"party",lv:"B",aud:"both",
+ org:"党委统战部 / 武汉大学新闻网",by:"记者团队",col:"笃行武大",url:"http://news.whu.edu.cn/info/2341/504637.htm",
+ s:"学校组织开展民族团结进步宣传周系列活动，铸牢中华民族共同体意识。",
+ b:"新闻网讯为深入贯彻落实铸牢中华民族共同体意识的重要指示，学校组织开展民族团结进步宣传周系列活动。活动围绕民族团结进步主题，通过宣传引导、主题活动等形式，推动各民族交往交流交融，构筑各民族共有精神家园，守护好各民族共同家园。活动面向全校师生开放，各院系可组织学生与教师共同参与。"},
+{id:17,t:"关于实行冬季作息时间的通知",d:"2026-09-29",c:"notice",lv:"S",aud:"both",
+ org:"党政办公室 / 武汉大学主站",by:"党政办公室",col:"通知公告",url:"https://www.whu.edu.cn/new2024/tzggnr.jsp?urltype=news.NewsContentUrl&wbtreeid=5231&wbnewsid=275814",
+ s:"学校自2026年10月起实行冬季作息时间，全体师生作息时间相应调整。",
+ b:"根据季节变化规律，为科学合理安排师生作息时间，经学校研究决定，自2026年10月12日起实行冬季作息时间。作息时间调整后，上午、下午上课时间相应调整，请各位师生注意遵守新的作息安排，作息时间调整具体详见学校后续通知。冬季作息时间将持续至2027年夏季学期开学前。该通知面向全校师生与教职员工，涉及日常教学与工作安排。"}
+];
+
+// ============================================================
+// 实时数据层：尝试加载爬虫生成的 data_news.json
+// - 加载成功：用最新采集数据替换静态兜底数据
+// -加载失败：保留内置静态数据，页面功能不受影响
+// ============================================================
+let DATA_META={updated:'',source:'内置静态数据',live:false};
+function applyLiveData(payload){
+ if(!payload||!Array.isArray(payload.items)||!payload.items.length) return false;
+ const valid=payload.items.filter(x=>x&&x.t&&x.d&&/^\d{4}-\d{2}-\d{2}$/.test(x.d)&&/^https?:/.test(x.url||''));
+ if(valid.length<3) return false;
+
+ const byUrl={};
+ NEWS.forEach(n=>{byUrl[(n.url||'').split('?')[0]]=n});
+
+ let added=0,updated=0;
+ valid.forEach(it=>{
+   const key=(it.url||'').split('?')[0];
+   const old=byUrl[key];
+   if(old){
+     // 已有条目：用新数据补全摘要/正文（保留人工精修的正文）
+     if(it.s&&it.s.length>(old.s||'').length){old.s=it.s;updated++}
+     if(it.org)old.org=it.org;
+     if(it.by)old.by=it.by;
+     if(it.lv)old.lv=it.lv;
+     if(it.c)old.c=it.c;
+     if(it.aud)old.aud=it.aud;
+   }else{
+     NEWS.push({
+       id:'L'+Math.abs(hashStr(it.url||it.t)),
+       t:it.t,d:it.d,c:it.c||'headline',lv:it.lv||'B',aud:it.aud||'both',
+       org:it.org||it.ch||'武汉大学',by:it.by||'记者团队',col:it.col||'资讯',
+       url:it.url,s:it.s||it.t,b:it.b||it.s||it.t,_live:true
+     });
+     byUrl[key]={};
+     added++;
+   }
+ });
+ if(!added&&!updated) return false;
+ DATA_META={updated:payload.updated_at||'',source:'实时采集数据',live:true};
+ return true;
+}
+function hashStr(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0}return h}
+
+fetch('data_news.json?'+Date.now())
+ .then(r=>r.ok?r.json():Promise.reject('HTTP '+r.status))
+ .then(j=>{if(applyLiveData(j)){render();updateMeta()}})
+ .catch(()=>{/* 静默降级，保留静态数据 */});
+
+function updateMeta(){
+ const el=document.getElementById('gen-time');
+ if(el&&DATA_META.live)el.textContent=DATA_META.updated;
+ const st=document.getElementById('data-state');
+ if(st)st.textContent=DATA_META.live?'实时采集':'内置快照';
+}
+
+const CHANNELS=[
+{n:"武汉大学主站",u:"党政办公室（新闻办）",t:"官方网站",lv:"S",c:"要闻速览/通知公告/学术科研汇总",url:"https://www.whu.edu.cn"},
+{n:"智慧珞珈",u:"信息中心",t:"官方平台",lv:"S",c:"统一数字服务门户：通知公告、待办、消息、办事大厅",url:"https://zhlj.whu.edu.cn"},
+{n:"武汉大学新闻网",u:"党委宣传部",t:"官方媒体",lv:"S",c:"武大要闻、综合新闻、学术动态、缤纷校园",url:"https://news.whu.edu.cn"},
+{n:"党委宣传部官网",u:"党委宣传部",t:"官方媒体",lv:"S",c:"媒体矩阵总入口、思政工作、校园文化",url:"https://xcb.whu.edu.cn"},
+{n:"研究生院",u:"研究生院",t:"业务系统",lv:"S",c:"研究生招生、培养、学位、推免通知",url:"https://gs.whu.edu.cn"},
+{n:"研究生招生信息网",u:"研究生院",t:"业务系统",lv:"S",c:"硕士/博士招生简章、复试、录取公示",url:"https://wdyz.whu.edu.cn"},
+{n:"通知公告（主站栏）",u:"党政办公室",t:"官方网站",lv:"S",c:"面向全校的正式通知",url:"https://www.whu.edu.cn/tzgg.htm"},
+{n:"武汉大学（luojia1893）",u:"党委宣传部",t:"微信公众号",lv:"A",c:"招生、开学季、校庆专题，含校园卡/成绩/课表服务",url:"https://mp.weixin.qq.com"},
+{n:"武大发布",u:"党委宣传部",t:"微信公众号",lv:"A",c:"权威发布、时政专题",url:"https://mp.weixin.qq.com"},
+{n:"武大思政",u:"学工部",t:"微信公众号",lv:"A",c:"思政引领、学习教育",url:"https://mp.weixin.qq.com"},
+{n:"文谈社",u:"党委宣传部",t:"微信公众号",lv:"B",c:"评论、深度解读",url:"https://mp.weixin.qq.com"},
+{n:"武汉大学人民号",u:"党委宣传部",t:"今日头条",lv:"B",c:"要闻转载",url:"https://www.toutiao.com"},
+{n:"武汉大学微博",u:"党委宣传部",t:"微博",lv:"B",c:"校园快讯、活动直播",url:"https://weibo.com/wuhandaxue"},
+{n:"武汉大学视频号",u:"党委宣传部",t:"微信视频号",lv:"B",c:"短视频资讯",url:"https://channels.weixin.qq.com"},
+{n:"武汉大学抖音号",u:"党委宣传部",t:"抖音",lv:"B",c:"校园影像",url:"https://www.douyin.com"},
+{n:"武汉大学B站",u:"党委宣传部",t:"哔哩哔哩",lv:"B",c:"校园影像、讲座回放",url:"https://space.bilibili.com"},
+{n:"武汉大学快手",u:"党委宣传部",t:"快手",lv:"B",c:"校园影像",url:"https://www.kuaishou.com"},
+{n:"武汉大学头条号",u:"党委宣传部",t:"今日头条",lv:"B",c:"图文资讯",url:"https://www.toutiao.com"},
+{n:"武大百家号",u:"党委宣传部",t:"百度百家号",lv:"B",c:"图文资讯",url:"https://baijiahao.baidu.com"},
+{n:"校报电子版",u:"党委宣传部",t:"校园媒体",lv:"B",c:"校报文章、要闻深度报道",url:"https://www.whu.edu.cn"},
+{n:"武汉大学广播台",u:"党委宣传部",t:"校园媒体",lv:"B",c:"校园广播、活动预告",url:"https://www.whu.edu.cn"},
+{n:"哲学学院",u:"哲学学院",t:"院系子站",lv:"A",c:"学院通知、学术动态",url:"https://philosophy.whu.edu.cn"},
+{n:"国学院",u:"国学院",t:"院系子站",lv:"A",c:"学院通知、学术动态",url:"https://guoxue.whu.edu.cn"},
+{n:"文学院",u:"文学院",t:"院系子站",lv:"A",c:"学院通知、学术动态",url:"https://chinese.whu.edu.cn"},
+{n:"历史学院",u:"历史学院",t:"院系子站",lv:"A",c:"学院通知、学术动态",url:"https://www.history.whu.edu.cn"},
+{n:"新闻与传播学院",u:"新闻与传播学院",t:"院系子站",lv:"A",c:"学院通知、招聘公告",url:"https://journal.whu.edu.cn"},
+{n:"外国语言文学学院",u:"外国语言文学学院",t:"院系子站",lv:"A",c:"学院通知、学术动态",url:"https://fls.whu.edu.cn"},
+{n:"法学院",u:"法学院",t:"院系子站",lv:"A",c:"学院通知、招生信息",url:"https://golaw.whu.edu.cn"},
+{n:"政治与公共管理学院",u:"政治与公共管理学院",t:"院系子站",lv:"A",c:"教学/招生/科研/学工/人事通知",url:"https://www.pspa.whu.edu.cn"},
+{n:"社会学院",u:"社会学院",t:"院系子站",lv:"A",c:"学院通知、学术动态",url:"https://shxx.whu.edu.cn"},
+{n:"经济与管理学院",u:"经济与管理学院",t:"院系子站",lv:"A",c:"学院通知、学术动态",url:"https://ems.whu.edu.cn"},
+{n:"信息管理学院",u:"信息管理学院",t:"院系子站",lv:"A",c:"党建、招生、教务、科研、学工通知",url:"https://sim.whu.edu.cn"},
+{n:"马克思主义学院",u:"马克思主义学院",t:"院系子站",lv:"A",c:"学院通知、学术动态",url:"https://marx.whu.edu.cn"},
+{n:"教育科学研究院",u:"教育科学研究院",t:"院系子站",lv:"A",c:"学院通知、学术动态",url:"https://ces.whu.edu.cn"},
+{n:"数学与统计学院",u:"数学与统计学院",t:"院系子站",lv:"A",c:"学院通知、科研进展",url:"https://maths.whu.edu.cn"},
+{n:"物理科学与技术学院",u:"物理科学与技术学院",t:"院系子站",lv:"A",c:"学院通知、科研进展",url:"https://physics.whu.edu.cn"},
+{n:"化学与分子科学学院",u:"化学与分子科学学院",t:"院系子站",lv:"A",c:"学院通知、科研进展",url:"https://chem.whu.edu.cn"},
+{n:"生命科学学院",u:"生命科学学院",t:"院系子站",lv:"A",c:"学院通知、科研进展",url:"https://bio.whu.edu.cn"},
+{n:"资源与环境科学学院",u:"资源与环境科学学院",t:"院系子站",lv:"A",c:"学院通知、科研进展",url:"https://sres.whu.edu.cn"},
+{n:"计算机学院",u:"计算机学院",t:"院系子站",lv:"A",c:"学院通知、人才招聘、科研动态",url:"https://cs.whu.edu.cn"},
+{n:"电气与自动化学院",u:"电气与自动化学院",t:"院系子站",lv:"A",c:"学院通知、科研动态",url:"https://eea.whu.edu.cn"},
+{n:"动力与机械学院",u:"动力与机械学院",t:"院系子站",lv:"A",c:"学院通知、科研动态",url:"https://pmc.whu.edu.cn"},
+{n:"城市设计学院",u:"城市设计学院",t:"院系子站",lv:"A",c:"学院通知、科研动态",url:"https://sud.whu.edu.cn"},
+{n:"水利水电学院",u:"水利水电学院",t:"院系子站",lv:"A",c:"学院通知、科研动态",url:"https://swrh.whu.edu.cn"},
+{n:"人工智能学院",u:"人工智能学院",t:"院系子站",lv:"A",c:"学院新闻、通知公告、科研进展",url:"https://sai.whu.edu.cn"},
+{n:"机器人学院",u:"机器人学院",t:"院系子站",lv:"A",c:"学工在线、通知公告、人才培养",url:"https://jqrxg.whu.edu.cn"},
+{n:"综合事务服务中心",u:"党政办公室",t:"业务系统",lv:"B",c:"服务大厅、办事指南",url:"https://service.whu.edu.cn"},
+{n:"武汉大学“十五五”规划专题网",u:"党政办公室",t:"专题站",lv:"B",c:"学校发展规划",url:"https://sww.whu.edu.cn"},
+{n:"智慧珞珈（新生版）",u:"信息中心",t:"专题站",lv:"B",c:"新生报到全流程、新生必办",url:"https://zhlj.whu.edu.cn"}
+];
+
+// 来源简介与内容范围说明（按渠道名称索引）
+const CDESC={
+"武汉大学主站":["学校官方网站","学校门户主站，是全校各类公告与资讯的权威首发口。要闻、通知公告、学术科研汇总均以此处为准，是所有聚合工作的第一手来源。","学校要闻、通知公告、学术科研动态、专题聚焦、媒体武大"],
+"智慧珞珈":["官方数字平台","学校统一数字服务门户，由信息中心运营，覆盖 PC 端、App、小程序与公众号三端融合，内含通知公告、待办、消息与办事大厅。","通知公告、待办事项、消息中心、办事大厅、校园卡与缴费等校园服务入口"],
+"武汉大学新闻网":["官方新闻网","党委宣传部主办的权威新闻发布平台，是校内媒体矩阵的核心枢纽，设置武大要闻、综合新闻、学术动态、缤纷校园等栏目。","武大要闻、综合新闻、学术动态、缤纷校园、珞珈人物、合作交流、专题报道"],
+"党委宣传部官网":["官方媒体","党委宣传部官方网站，公开完整的新媒体矩阵账号清单，并承担思政工作与校园文化的对外发布。","媒体矩阵总览、校园文化、思政工作、主题教育、媒体外联"],
+"研究生院":["业务系统","研究生院官方网站，负责研究生培养体系管理，发布培养、学位、推免等关键通知。","研究生培养方案、学位授予、推免工作、研究生教育管理通知"],
+"研究生招生信息网":["业务系统","硕士、博士研究生招生专用信息发布平台，招生季的核心信源，公告时效性强、错过不可补救。","招生简章、招生目录、复试细则、录取名单公示、调剂信息"],
+"通知公告（主站栏）":["学校官网栏目","武汉大学主站的通知公告专栏，由党政办公室及各业务部门发布，是全校性正式通知的集中出口。","面向全校的行政通知、作息时间安排、缴费与报销、项目报送等"],
+"武汉大学（luojia1893）":["官方微信公众号","学校官方主微信，2014年上线。除新闻专题外设有校园卡、成绩单、课表等服务端口，是学生获取资讯的主要入口。","招生季与开学季专题、校庆系列报道、校园卡与成绩课表查询服务"],
+"武大发布":["官方微信公众号","学校权威发布账号，用于发布重要通知与时政专题内容，是官方口径的正式对外发布渠道。","时政专题、权威通知发布、重要节点宣传"],
+"武大思政":["官方微信公众号","学工部门主导的思想政治教育账号，面向学生开展思想引领与主题学习教育。","思政引领、学习教育、主题活动、学生思想动态"],
+"文谈社":["官方微信公众号","以评论与深度解读为主的校园媒体账号，对重要事件作深度分析，常有教师学者署名文章。","评论文章、深度解读、学者访谈"],
+"武汉大学人民号":["第三方平台·官方账号","在今日头条开设的官方账号，转载学校要闻，覆盖人群以校外为主，可作为交叉验证信源。","学校要闻转载、正能量报道"],
+"武汉大学微博":["官方微博","2009年上线，全国最早的高校官方微博之一，曾获教育部十佳官方微博，在校园快讯与直播类内容上更新及时。","校园快讯、活动直播、话题互动、重大时刻发布"],
+"武汉大学视频号":["官方视频号","微信生态内的短视频发布渠道，用于发布校园活动与人物故事类短视频内容。","校园短视频、活动记录、人物故事"],
+"武汉大学抖音号":["官方抖音号","短视频平台官方账号，以校园影像与学生生活类短视频为主要内容，传播速度快、覆盖面广。","校园影像、学生生活短视频、风景记录"],
+"武汉大学B站":["官方哔哩哔哩账号","B站官方账号，适合承载较长的讲座回放与专题视频，是学术活动视频化的重要渠道。","讲座回放、专题视频、校园纪录片"],
+"武汉大学快手":["官方快手账号","短视频平台官方账号，内容以校园影像为主，与抖音号形成互补覆盖。","校园影像、人物故事"],
+"武汉大学头条号":["官方头条号","今日头条平台的官方图文账号，用于发布学校各类图文资讯。","图文资讯、要闻转载"],
+"武大百家号":["官方百家号","百度百家平台官方账号，用于图文资讯的分发与搜索场景覆盖。","图文资讯、招生宣传"],
+"校报电子版":["校园媒体","学校官方校报的电子版，刊载经过深度编辑的报道与评论，是了解学校历史与观点的窗口。","校报文章、要闻深度报道、观点评论"],
+"武汉大学广播台":["校园媒体","校园广播媒体，覆盖面广，在考试周、假期前后等关键时段承担信息播报职能。","校园广播、活动预告、重要提示广播"],
+"哲学学院":["学院官网","人文学部所属学院官网，发布本科与研究生培养、学术讲座、招生等通知。","学院通知公告、学术动态、本科生与研究生培养、招生招聘"],
+"国学院":["学院官网","人文学部所属学院官网，发布学术论坛、课程与培养方案相关信息。","学院通知公告、学术动态、人才培养"],
+"文学院":["学院官网","人文学部所属学院官网，发布学术会议、文学活动与培养相关通知。","学院通知公告、学术动态、学生活动"],
+"历史学院":["学院官网","人文学部所属学院官网，发布学术讲座、研究生招生与培养相关通知。","学院通知公告、学术动态、研究生招生"],
+"新闻与传播学院":["学院官网","新闻传播学科人才培养与研究机构，发布学术活动、招聘公告与培养相关通知。","通知公告、博士后与教师招聘、学术活动、研究生培养"],
+"外国语言文学学院":["学院官网","人文学部所属学院官网，发布学术动态、讲座与外语类培养相关通知。","学院通知公告、学术动态、外语活动"],
+"法学院":["学院官网","法学学科教学科研机构，发布招生、学术与实践教学相关通知。","学院通知公告、招生信息、学术动态"],
+"政治与公共管理学院":["学院官网","设教学通知、招生通知、科研通知、学工通知、人事通知等多类栏目，是分类结构较规范的院系子站。","教学通知、招生通知、科研通知、学工通知、人事通知、学院要闻"],
+"社会学院":["学院官网","人文学部所属学院官网，发布学术讲座与社会调查实践相关通知。","学院通知公告、学术动态、社会实践"],
+"经济与管理学院":["学院官网","经管学科教学科研机构，发布学术论坛、EMBA 与培养项目相关通知。","学院通知公告、学术动态、项目招生"],
+"信息管理学院":["学院官网","设党政综合、招生招聘、教务管理、科研进展、党群工作等多类栏目，栏目层级清晰、信息密度高。","党政综合、招生招聘、教务管理、科研进展、党群工作、人才招聘"],
+"马克思主义学院":["学院官网","马克思主义学科教学科研机构，发布理论研究与教学相关通知。","学院通知公告、学术动态、教学安排"],
+"教育科学研究院":["学院官网","教育科学研究机构，发布学术会议与研究项目相关通知。","学院通知公告、学术动态、项目申报"],
+"数学与统计学院":["学院官网","理学部所属学院官网，发布科研进展与研究生培养相关通知。","学院通知公告、科研进展、研究生培养"],
+"物理科学与技术学院":["学院官网","理学部所属学院官网，发布科研进展与教务相关通知。","学院通知公告、科研进展、教务安排"],
+"化学与分子科学学院":["学院官网","理学部所属学院官网，发布科研成果与实验教学相关通知。","学院通知公告、科研进展、实验教学"],
+"生命科学学院":["学院官网","理学部所属学院官网，发布科研进展、人才培养与实验平台相关通知。","学院通知公告、科研进展、人才培养"],
+"资源与环境科学学院":["学院官网","理学部所属学院官网，发布科研进展与野外观测站相关通知。","学院通知公告、科研进展、平台开放"],
+"计算机学院":["学院官网","计算机学科教学科研机构，发布科研动态与人才招聘信息，含高层次人才引进专区。","学院通知公告、人才招聘、科研动态、人才培养"],
+"电气与自动化学院":["学院官网","工学部所属学院官网，发布教学、科研与人才培养相关通知。","学院通知公告、科研动态、教学安排"],
+"动力与机械学院":["学院官网","工学部所属学院官网，发布科研进展与工程实践相关通知。","学院通知公告、科研进展、工程实践"],
+"城市设计学院":["学院官网","工学部所属学院官网，发布城市规划设计相关学术与实践通知。","学院通知公告、科研进展、设计实践"],
+"水利水电学院":["学院官网","工学部所属学院官网，发布学科建设与人才培养相关通知。","学院通知公告、科研进展、人才培养"],
+"人工智能学院":["学院官网","2020年前后成立的新学院，设学院新闻、通知公告、科研进展、党群工作等栏目。","学院新闻、通知公告、科研进展、人才培养、人才招聘"],
+"机器人学院":["学院官网","新兴交叉学科学院，设学工在线专栏，发布学生教育管理与安全教育类通知。","学工在线、通知公告、人才培养、安全教育管理"],
+"综合事务服务中心":["业务系统","学校综合服务门户，提供办事指南、服务大厅与流程说明。","办事指南、服务项目、流程说明"],
+"武汉大学“十五五”规划专题网":["专题站","学校发展规划专题网站，集中发布规划文本与相关解读。","学校发展规划文本、规划解读"],
+"智慧珞珈（新生版）":["专题站","面向新生的专题版本，集成新生报到全流程办事入口与新生必办事项。","新生报到流程、新生必办、校园生活指南、迎新资讯"]
+};
+
+// 栏目 -> 渠道名称 映射（用于资讯条目关联来源）
+const COLMAP={
+"武大要闻":"武汉大学新闻网","综合新闻":"武汉大学新闻网","学术动态":"武汉大学新闻网",
+"缤纷校园":"武汉大学新闻网","珞珈人物":"武汉大学新闻网","创新武大":"武汉大学新闻网",
+"珞珈讲坛":"武汉大学主站","通知公告":"通知公告（主站栏）",
+"红色武大":"党委宣传部官网","笃行武大":"党委宣传部官网"
+};
+
+let S={p:"home",aud:"all",cat:null,q:"",sort:"date",ch:null};
+
+function byAud(a){return a==="all"?NEWS:NEWS.filter(n=>n.aud===a||n.aud==="both")}
+function sorted(list){
+ let l=[...list];
+ if(S.sort==="date")l.sort((a,b)=>b.d.localeCompare(a.d)||b.id-a.id);
+ else if(S.sort==="dateAsc")l.sort((a,b)=>a.d.localeCompare(b.d)||a.id-b.id);
+ else {const w={S:3,A:2,B:1};l.sort((a,b)=>(w[b.lv]-w[a.lv])||(b.d.localeCompare(a.d)))}
+ return l;
+}
+function audTag(a){return a==="both"?'<span class="tag a-all">师生通用</span>':`<span class="tag a-${a}">${AUD[a]}向</span>`}
+function cat(c){return `<span class="tag c-${c}">${CATS[c]}</span>`}
+function lv(l){return `<span class="tag t-${l}">${l}级</span>`}
+
+// 全站统一来源展示组件：栏目 · 发布机构 · 作者 · 原文链接
+// （实际定义见下方"来源相关组件"，含来源详情关联与外链标识）
+
+function item(n){
+ return `<div class="it" onclick="openArticle(${n.id})">
+  <h4>${n.t}</h4>
+  <div class="meta">${audTag(n.aud)}${cat(n.c)}${lv(n.lv)}<span>${n.d}</span></div>
+  ${srcline(n)}
+ </div>`;
+}
+function empty(txt,act){
+ return `<div class="empty"><div class="ei">◍</div><h4>${txt}</h4><p>当前筛选条件下没有匹配的资讯，可尝试调整分类、切换身份或清空搜索关键词。</p>${act?'<button onclick="resetAll()">清空筛选条件</button>':''}</div>`;
+}
+function filterbar(){
+ let l=byAud(S.aud);
+ let c=Object.entries(CATS).map(([k,v])=>`<span class="chip ${S.cat===k?'on':''}" onclick="setCat('${k}')">${v}（${l.filter(n=>n.c===k).length}）</span>`).join("");
+ return `<div class="filterbar"><span class="fb-l">分类</span><div class="chips">${c}</div></div>
+ <div class="filterbar"><span class="fb-l">排序</span>
+  <select onchange="setSort(this.value)">
+   <option value="date" ${S.sort==="date"?'selected':''}>最新发布在前</option>
+   <option value="dateAsc" ${S.sort==="dateAsc"?'selected':''}>最早发布在前</option>
+   <option value="lv" ${S.sort==="lv"?'selected':''}>重要程度优先</option>
+  </select>
+  <span class="fb-l">当前身份</span><div class="chips">${audChips()}</div>
+  <span class="cnt">共 ${l.length} 条</span></div>`;
+}
+function audChips(){
+ return [['all','全部'],['stu','学生'],['tea','教师']].map(([k,v])=>
+  `<span class="chip ${S.aud===k?'on':''}" onclick="setAud('${k}')">${v}${k!=='all'?`（${NEWS.filter(n=>n.aud===k||(k==='stu'&&n.aud==='both')).length}）`:''}</span>`).join("");
+}
+function audTabs(){
+ return `<div class="audtabs">
+  <div class="audtab ${S.aud==='stu'?'on':''}" onclick="goAud('stu')">
+   <div class="an"><span class="audico i-stu">学</span>学生资讯</div>
+   <div class="ad">面向在校学生的教务、学工、文体与科研启蒙类资讯</div></div>
+  <div class="audtab ${S.aud==='tea'?'on':''}" onclick="goAud('tea')">
+   <div class="an"><span class="audico i-tea">教</span>教师资讯</div>
+   <div class="ad">面向教职工的科研进展、人事事务、党团与青年教师成长类资讯</div></div>
+  <div class="audtab ${S.aud==='all'?'on':''}" onclick="goAud('all')">
+   <div class="an"><span class="audico i-all">全</span>全部资讯</div>
+   <div class="ad">不区分身份，浏览两类人群的完整信息流</div></div>
+ </div>`;
+}
+function side(){
+ let l=byAud(S.aud);
+ let notices=l.filter(n=>n.c==="notice");
+ return `<div class="box"><h3>当前视角</h3><div style="font-size:13px;color:var(--sub)">${S.aud==='all'?'全部资讯（师生通用视角）':S.aud==='stu'?'仅面向学生的资讯':"仅面向教师的资讯"}<br>共 ${l.length} 条</div></div>
+ <div class="box"><h3>重要通知快查</h3>
+  ${notices.length?notices.map(n=>`<div class="it" style="cursor:pointer" onclick="openArticle(${n.id})"><div style="font-size:14px;font-weight:500;margin-bottom:4px">${n.t}</div><div class="meta"><span class="deadline">有截止日期</span><span>${n.d}</span></div></div>`).join(""):'<p style="font-size:13px;color:var(--sub)">该视角下暂无通知公告</p>'}
+ </div>
+ <div class="box"><h3>浏览类别</h3><div class="chips">${Object.entries(CATS).map(([k,v])=>`<span class="chip ${S.cat===k?'on':''}" onclick="setCat('${k}')">${v}（${l.filter(n=>n.c===k).length}）</span>`).join("")}</div></div>
+ <div class="box"><h3>核心渠道直达</h3>
+  ${CHANNELS.slice(0,6).map(c=>`<div style="margin-bottom:10px"><span class="srclink" onclick="openSource('${c.n}')">${c.n}</span><div style="font-size:11px;color:var(--sub);margin-top:2px">${chInfo(c.n)[0]} · ${c.u}</div></div>`).join("")}
+  <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)"><span class="srclink" onclick="go('sources')">查看全部 ${CHANNELS.length} 个来源 ›</span></div>
+ </div>`;
+}
+
+function renderFeed(){
+ let l=sorted(S.q?byAud(S.aud).filter(n=>(n.t+n.s+n.col+n.org+n.by).includes(S.q)):byAud(S.aud));
+ let feat=l[0];
+ const AUDMETA={
+  stu:{k:'学生视角 · 今日要闻',h:'面向学生的资讯',d:'教务安排、学工事务、文体活动与科研启蒙。此类信息面向在校本科生与研究生，与教师资讯分开呈现，互不混杂。'},
+  tea:{k:'教师视角 · 今日要闻',h:'面向教师的资讯',d:'科研进展与成果、人事与党团事务、学术讲座与青年教师成长。此类信息面向教职员工，与学生资讯分开呈现，互不混杂。'},
+  all:{k:'今日要闻',h:'全部资讯',d:'不区分身份，浏览面向学生与教师两类人群的完整信息流。标注“师生通用”的资讯对两类人群均重要。'}
+ };
+ const m=AUDMETA[S.aud];
+ let head = S.aud==='all'?'':`<div class="card" style="border-left:3px solid ${S.aud==='stu'?'var(--stu)':'var(--tea)'}">
+   <div style="font-size:16px;font-weight:600;margin-bottom:6px">${m.h}</div>
+   <div style="font-size:13px;color:var(--sub)">${m.d}</div>
+   <div class="meta" style="margin-top:10px">${S.aud==='stu'?'<span class="tag a-stu">学生向</span>':'<span class="tag a-tea">教师向</span>'}<span class="tag a-all">师生通用 ${NEWS.filter(n=>n.aud==='both').length} 条</span><span>本视角共 ${l.length} 条</span></div>
+  </div>`;
+ let body = l.length?`
+  <div class="hero"><div class="top">
+   <div class="kicker">${m.k}</div>
+   <h3 onclick="openArticle(${feat.id})">${feat.t}</h3>
+   <p>${feat.s}</p>
+   <div class="meta">${audTag(feat.aud)}${cat(feat.c)}${lv(feat.lv)}<span>${feat.d}</span></div>
+   ${srcline(feat)}
+  </div></div>
+  <h2 class="sec">最新资讯</h2>
+  <div class="card list">${l.slice(1,9).map(item).join("")||'<div class="empty" style="padding:24px"><p>该视角下暂无更多资讯</p></div>'}</div>
+  <h2 class="sec">全部条目</h2>
+  <div class="card list">${l.slice(9).map(item).join("")}</div>
+ `:empty('没有匹配的资讯');
+ return `${audTabs()}${head}${filterbar()}<div class="layout"><div>${body}</div><aside>${side()}</aside></div>`;
+}
+
+function renderTimeline(){
+ let l=sorted(byAud(S.aud).filter(n=>!S.q||(n.t+n.s+n.col+n.org+n.by).includes(S.q)));
+ let groups={};
+ l.forEach(n=>{(groups[n.d]=groups[n.d]||[]).push(n)});
+ let days=Object.keys(groups).sort().reverse();
+ let nav=`<div class="filterbar"><span class="fb-l">身份</span><div class="chips">${audChips()}</div></div>`;
+ if(!l.length)return `<h2 class="sec">资讯时间线</h2>${nav}${empty('时间线中没有匹配的资讯')}`;
+ return `<h2 class="sec">资讯时间线 · 2026-10-01 至 10-13</h2>${nav}
+ ${days.map(d=>`<div class="tl-day"><div class="tl-date"><span>${d}</span><span class="n">${groups[d].length} 条</span><span class="ln"></span></div>
+ <div class="card list">${groups[d].map(item).join("")}</div></div>`).join("")}`;
+}
+
+function renderCategory(){
+ let c=S.cat||"headline";
+ let l=sorted(byAud(S.aud).filter(n=>n.c===c));
+ let nav=`<div class="filterbar"><span class="fb-l">身份</span><div class="chips">${audChips()}</div>
+ <span class="fb-l">分类</span><div class="chips">${Object.entries(CATS).map(([k,v])=>`<span class="chip ${k===c?'on':''}" onclick="setCat('${k}')">${v}</span>`).join("")}</div></div>
+ <div class="filterbar"><span class="fb-l">排序</span>
+  <select onchange="setSort(this.value)">
+   <option value="date" ${S.sort==="date"?'selected':''}>最新发布在前</option>
+   <option value="dateAsc" ${S.sort==="dateAsc"?'selected':''}>最早发布在前</option>
+   <option value="lv" ${S.sort==="lv"?'selected':''}>重要程度优先</option>
+  </select><span class="cnt">${CATS[c]} · 共 ${l.length} 条</span></div>`;
+ if(!l.length)return `<h2 class="sec">${CATS[c]}</h2>${nav}${empty(`「${CATS[c]}」分类下暂无${S.aud==='all'?'':(S.aud==='stu'?'学生':'教师')}相关资讯`)}`;
+ return `<h2 class="sec">${CATS[c]}</h2>${nav}<div class="card list">${l.map(item).join("")}</div><div style="margin-top:20px">${side()}</div>`;
+}
+
+// ---- 来源相关组件 ----
+const EXT='<svg class="ico" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M8.5 6v3.2a1.3 1.3 0 0 1-1.3 1.3H3.3A1.3 1.3 0 0 1 2 9.2V5.3A1.3 1.3 0 0 1 3.3 4h3.2"/><polyline points="7.6 1.8 10.6 1.8 10.6 4.8"/><line x1="10.6" y1="1.8" x2="6.4" y2="6"/></svg>';
+const EXTT='<span class="extmark">'+EXT+' 外部网站</span>';
+function chInfo(n){return CDESC[n]||[CHANNELS.find(c=>c.n===n)?.t||"其他渠道","暂无简介说明。","暂未收录内容范围"]}
+function chNameOf(n){return COLMAP[n.col]||(CHANNELS.find(c=>c.n===n.org)?n.org:"武汉大学主站")}
+
+// 列表项来源行：栏目·机构·作者 + 关联来源链接 + 原文链接
+function srcline(n){
+ return `<div class="srcline">来源栏目：${n.col} ｜ 发布机构：${n.org} ｜ 作者：${n.by} ｜
+ <span class="srclink" onclick="event.stopPropagation();openSource('${chNameOf(n)}')">来源详情</span> ｜
+ <a href="${n.url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${EXT} 原文链接</a></div>`;
+}
+// 来源卡片
+function srcCard(c){
+ const d=chInfo(c.n);
+ return `<div class="srccard">
+  <div class="srchd"><h4 onclick="openSource('${c.n}')">${c.n}</h4><span class="typetag">${d[0]}</span></div>
+  <div class="srcunit">${c.u}</div>
+  <div class="srcdesc">${d[1]}</div>
+  <div class="srcscope"><strong>内容范围：</strong>${d[2]}</div>
+  <div class="srcfoot">${lv(c.lv)}
+   <a class="linkbtn" href="${c.url}" target="_blank" rel="noopener noreferrer">${EXT} 访问官网</a>
+   <span class="linkbtn ghost" onclick="openSource('${c.n}')">来源详情</span>
+  </div>
+  <div style="font-size:11px;color:var(--sub);margin-top:9px">${EXTT}链接在新标签页打开，不影响当前浏览</div>
+ </div>`;
+}
+// 来源详情弹窗
+function openSource(name){
+ const c=CHANNELS.find(x=>x.n===name);
+ if(!c){document.getElementById("modal").innerHTML=`<div class="mask" onclick="if(event.target===this)closeModal()"><div class="mbox"><div class="mhd"><h3>${name}</h3><button class="mclose" onclick="closeModal()">×</button></div><div class="mbd"><p style="font-size:14px;color:var(--sub)">该渠道暂未收录详细信息。</p></div></div></div>`;return}
+ const d=chInfo(c.n);
+ const rel=NEWS.filter(n=>chNameOf(n)===name);
+ document.getElementById("modal").innerHTML=`<div class="mask" onclick="if(event.target===this)closeModal()">
+ <div class="mbox">
+  <div class="mhd"><h3>${c.n}</h3><button class="mclose" onclick="closeModal()" aria-label="关闭">×</button></div>
+  <div class="mbd">
+   <div class="mrow"><div class="lb">来源类型</div><div class="vl"><span class="typetag">${d[0]}</span></div></div>
+   <div class="mrow"><div class="lb">所属单位</div><div class="vl">${c.u}</div></div>
+   <div class="mrow"><div class="lb">重要程度</div><div class="vl">${lv(c.lv)} <span style="font-size:12px;color:var(--sub)">${c.lv==='S'?'权威发布口，影响全校师生':c.lv==='A'?'官方媒体与业务系统':'垂直、专题或校园媒体'}</span></div></div>
+   <div class="mrow"><div class="lb">简介</div><div class="vl">${d[1]}</div></div>
+   <div class="mrow"><div class="lb">内容范围</div><div class="mscope">${d[2]}</div></div>
+   <div class="mfoot">
+    <a class="linkbtn" href="${c.url}" target="_blank" rel="noopener noreferrer">${EXT} 访问官方网站</a>
+    ${EXTT}
+    <span style="font-size:12px;color:var(--sub)">链接将在新标签页打开，不影响当前浏览</span>
+   </div>
+   ${rel.length?`<div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line)">
+     <div class="lb" style="font-size:11px;color:var(--sub);margin-bottom:10px">该来源提供的资讯（${rel.length} 条）</div>
+     <div class="list">${rel.map(item).join("")}</div></div>`:`<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--sub)">本站暂未从该来源采集到10 月 1 日以来的资讯。</div>`}
+  </div>
+ </div></div>`;
+ document.body.style.overflow="hidden";
+}
+function closeModal(){document.getElementById("modal").innerHTML="";document.body.style.overflow=""}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+
+function renderSources(){
+ const l=sorted(byAud(S.aud));
+ let shown=CHANNELS.filter(c=>S.q?((c.n+c.u+c.t+c.c).includes(S.q)||(chInfo(c.n)[0]+chInfo(c.n)[1]+chInfo(c.n)[2]).includes(S.q)):true);
+ const relCh=[...new Set(l.map(n=>chNameOf(n)))];
+ return `<h2 class="sec">资讯来源说明</h2>
+ <p style="font-size:13px;color:var(--sub);margin-bottom:14px">本站所有资讯均来自下列官方渠道，每条资讯均标注来源栏目、发布机构、作者与原文链接。点击「来源详情」可查看该渠道的简介与内容范围；点击「访问官网」将在新标签页打开对应官方网站，不打断当前浏览状态。</p>
+ <div class="filterbar"><input id="q" placeholder="搜索来源名称、类型或内容范围…" value="${S.q}">
+  <span class="cnt">共 ${shown.length} 个来源</span></div>
+ <div class="card" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+  <span class="fb-l">快速定位本视角正在引用的来源</span>
+  <div class="chips">${relCh.map(n=>`<span class="chip on" onclick="openSource('${n}')">${n}（${l.filter(x=>chNameOf(x)===n).length}）</span>`).join("")}</div>
+ </div>
+ ${shown.length?`<div class="srcgrid" style="margin-top:16px">${shown.map(srcCard).join("")}</div>`
+ :empty('没有匹配的来源',1)}`;
+}
+
+function renderChannels(){
+ return `<h2 class="sec">官方渠道清单</h2>
+ <p style="font-size:13px;color:var(--sub);margin-bottom:16px">以官方“智慧珞珈”为起点反向梳理的完整渠道台账，共 ${CHANNELS.length} 个。重要程度：<span class="tag t-S">S级</span> 权威发布口（影响全校，必须接入）；<span class="tag t-A">A级</span> 官方媒体与业务系统；<span class="tag t-B">B级</span> 垂直/专题/校园媒体。所有链接均为<b>外部网站</b>，将在新标签页打开。</p>
+ <div class="filterbar"><input id="q" placeholder="搜索渠道名称、单位或内容类型…" value="${S.q}"><span class="cnt">共 ${CHANNELS.length} 个渠道</span></div>
+ <div class="tblwrap"><table><thead><tr><th>渠道名称</th><th>所属单位</th><th>类型</th><th>内容类型</th><th>重要程度</th><th>详情</th><th>入口</th></tr></thead><tbody>
+ ${CHANNELS.map(c=>`<tr><td><strong>${c.n}</strong></td><td>${c.u}</td><td>${chInfo(c.n)[0]}</td><td style="color:var(--sub)">${c.c}</td><td>${lv(c.lv)}</td><td><span class="srclink" onclick="openSource('${c.n}')">详情</span></td><td><a class="linkbtn" href="${c.url}" target="_blank" rel="noopener noreferrer">${EXT} 官网</a></td></tr>`).join("")}
+ </tbody></table></div>`;
+}
+
+function renderAbout(){
+ return `<h2 class="sec">关于本站</h2>
+ <div class="card"><div class="article"><h1 style="font-size:20px">武汉大学校园资讯聚合</h1>
+ <p>本站是一个面向武汉大学在校师生与教师的第三方校园资讯聚合工具，汇总学校及各院系官网、官方新媒体（微信公众号、微博、抖音、B站等）发布的资讯，解决“信息分散、易错过、无法回查”的痛点。</p>
+ <h3 style="margin:20px 0 10px;font-size:15px">按身份分离呈现</h3>
+ <div class="abbr">本站资讯按<b>学生</b>与<b>教师</b>两个维度分类，两类信息互不混杂：<br>
+ <span class="tag a-stu">学生向</span> 教务、学工、文体活动、科研启蒙类<br>
+ <span class="tag a-tea">教师向</span> 科研进展、人事事务、党团思政、青年教师成长类<br>
+ <span class="tag a-all">师生通用</span> 全校性通知与重大活动，对两类人群均重要</div>
+ <h3 style="margin:20px 0 10px;font-size:15px">来源标注与追溯</h3>
+ <div class="abbr">每条资讯均在列表中直接展示<b>来源栏目、发布机构、作者、原文链接</b>四项，并在详情页以结构化表格完整呈现。点击「来源详情」可查看该渠道的类型、简介与内容范围；点击「访问官网」或原文链接会在<b>新标签页</b>打开对应官方网站（均带外部链接图标标识），不会打断当前浏览状态。</div>
+ <h3 style="margin:20px 0 10px;font-size:15px">免责声明</h3>
+ <p>本站为非官方第三方工具，非武汉大学官方产品，与武汉大学及任何院系、职能部门无隶属或授权关系。所有资讯版权归原发布单位所有，本站仅作原文摘录与索引。若内容有误，请以原文链接为准。</p>
+ <div class="abbr"><b>数据来源与更新</b><br>本站资讯由采集脚本从武汉大学主站、新闻网等官方渠道自动获取，覆盖要闻速览、综合新闻、学术动态、珞珈人物、缤纷校园与通知公告等栏目。<b>每次采集会与原有数据去重合并</b>，相同链接仅补充最新摘要，不产生重复条目。若自动获取失败，页面会回退到内置快照，功能不受影响。</div>
+ <div class="meta" style="margin-top:16px"><span>数据区间：2026-10-01 起滚动更新</span><span>共 ${NEWS.length} 条资讯</span><span>${CHANNELS.length} 个来源渠道</span></div>
+ </div></div>`;
+}
+
+function renderArticle(id){
+ let n=NEWS.find(x=>x.id==id);
+ if(!n){S.p="home";render();return}
+ let rel=NEWS.filter(x=>x.c===n.c&&x.id!==n.id&&x.aud===n.aud).slice(0,4);
+ if(!rel.length)rel=NEWS.filter(x=>x.c===n.c&&x.id!==n.id).slice(0,4);
+ return `<span class="back" onclick="go('home')">← 返回</span>
+ <div class="card article"><h1>${n.t}</h1>
+ <div class="meta">${audTag(n.aud)}${cat(n.c)}${lv(n.lv)}<span>${n.d}</span></div>
+ <div class="abbr"><strong>摘要</strong><br>${n.s}</div>
+ <div class="body">${n.b.split("。").filter(x=>x.trim()).map(p=>`<p>${p}。</p>`).join("")}</div>
+ <div class="srcbox"><h4>来源信息</h4><dl>
+  <dt>来源栏目</dt><dd>${n.col}</dd>
+  <dt>发布机构</dt><dd>${n.org}</dd>
+  <dt>作者</dt><dd>${n.by}</dd>
+  <dt>发布日期</dt><dd>${n.d}</dd>
+  <dt>适用人群</dt><dd>${n.aud==='both'?'师生通用':AUD[n.aud]}</dd>
+  <dt>关联来源</dt><dd><span class="srclink" onclick="openSource('${chNameOf(n)}')">${chNameOf(n)} · 查看来源详情</span></dd>
+  <dt>原文链接</dt><dd><a class="ext urllink" href="${n.url}" target="_blank" rel="noopener noreferrer"><span class="u">${n.url}</span> ${EXTT}</a></dd>
+ </dl>
+ <div style="font-size:12px;color:var(--sub);margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">本文内容摘自上述渠道发布原文，版权归原发布单位所有。如有出入，以原文为准。</div>
+ </div></div>
+ <h2 class="sec">相关阅读</h2>
+ <div class="card list">${rel.map(item).join("")||'<div class="empty" style="padding:24px"><p>暂无同类相关资讯</p></div>'}</div>`;
+}
+
+function render(){
+ document.getElementById("nav").querySelectorAll("a").forEach(a=>a.classList.toggle("on",a.dataset.p===S.p));
+ let h;
+ if(S.p==="article")h=renderArticle(S.id);
+ else if(S.p==="home"||S.p==="student"||S.p==="teacher")h=renderFeed();
+ else if(S.p==="timeline")h=renderTimeline();
+ else if(S.p==="sources")h=renderSources();
+ else if(S.p==="category")h=renderCategory();
+ else if(S.p==="channels")h=renderChannels();
+ else h=renderAbout();
+ document.getElementById("main").innerHTML=h;
+}
+function go(p){
+ S.p=p;
+ if(p==="student"){S.aud="stu";S.cat=null}
+ else if(p==="teacher"){S.aud="tea";S.cat=null}
+ else if(p==="home"){S.aud="all";S.cat=null}
+ render();window.scrollTo(0,0)
+}
+function goAud(a){S.aud=a;S.p=(a==='all'?'home':a);render();window.scrollTo(0,0)}
+function setAud(a){S.aud=a;render()}
+function setCat(c){S.cat=S.cat===c?null:c;if(S.cat)S.p="category";render()}
+function setSort(v){S.sort=v;render()}
+function openArticle(id){S.p="article";S.id=id;render();window.scrollTo(0,0)}
+function resetAll(){S.cat=null;S.q="";S.aud="all";S.sort="date";const i=document.getElementById("q");if(i)i.value="";go("home")}
+function doSearch(){S.q=document.getElementById("q").value.trim();S.p="home";render();window.scrollTo(0,0)}
+let tmr=null;
+document.getElementById("q").addEventListener("input",e=>{
+ clearTimeout(tmr);
+ const v=e.target.value, pos=e.target.selectionStart;
+ tmr=setTimeout(()=>{
+  S.q=v.trim();
+  if(S.p!=="sources"&&S.p!=="home")S.p="home";
+  render();
+  const n=document.getElementById("q");
+  if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(e){}}
+ },260);
+});
+
+document.getElementById("nav").addEventListener("click",e=>{
+ let a=e.target.closest("a");if(!a)return;e.preventDefault();go(a.dataset.p);
+});
+
+// 采集时间自动填充：取数据中最新的发布日期
+(function(){
+ const latest=NEWS.reduce((a,n)=>n.d>a?n.d:a,"");
+ const el=document.getElementById("gen-time");
+ if(el)el.textContent=latest;
+ updateMeta();
+})();
+
+document.getElementById("mn").innerHTML=`
+<a onclick="go('home')"><span class="mi">◎</span>首页</a>
+<a onclick="go('student')"><span class="mi">学</span>学生</a>
+<a onclick="go('teacher')"><span class="mi">教</span>教师</a>
+<a onclick="go('timeline')"><span class="mi">▤</span>时间线</a>
+<a onclick="go('sources')"><span class="mi">◫</span>来源</a>`;
+render();
+</script>
+</body>
+</html>
