@@ -35,7 +35,16 @@ from datetime import datetime
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE_DIR, 'data_news.json')
 
-API_VERSION = '1.0.0'
+# 远程数据源：GitHub 仓库中的数据文件。
+# GitHub Actions 每次采集后会提交新数据，API 运行时自动拉取最新版本，
+# 这样无需重新部署即可让线上数据保持新鲜。
+REMOTE_DATA_URL = os.environ.get(
+    'REMOTE_DATA_URL',
+    'https://raw.githubusercontent.com/tommyli731/whu-campus-news/main/data_news.json'
+)
+REMOTE_TIMEOUT = 8
+
+API_VERSION = '1.1.0'
 START_TIME = time.time()
 
 # 可选鉴权：设置环境变量 API_KEY 后启用
@@ -62,26 +71,66 @@ LEVELS = {
     'B': '常规',
 }
 
-_cache = {'mtime': None, 'data': None}
+_cache = {'key': None, 'data': None}
 _lock = threading.Lock()
+_CACHE_TTL = 300  # 远程数据缓存 5 分钟，避免高频请求打远程
+
+
+def fetch_remote():
+    """从 GitHub 拉取最新数据。失败返回 None。"""
+    if not REMOTE_DATA_URL:
+        return None
+    try:
+        req = urllib.request.Request(REMOTE_DATA_URL, headers={
+            'User-Agent': 'WHU-Campus-News-Api/' + API_VERSION,
+            'Accept': 'application/json',
+        })
+        with urllib.request.urlopen(req, timeout=REMOTE_TIMEOUT) as r:
+            data = json.loads(r.read().decode('utf-8'))
+        if isinstance(data, dict) and data.get('items'):
+            return data
+    except Exception:
+        pass
+    return None
+
+
+def load_local():
+    if not os.path.exists(DATA_FILE):
+        return None
+    try:
+        with open(DATA_FILE, encoding='utf-8') as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) and data.get('items') else None
+    except Exception:
+        return None
 
 
 def load_data():
-    """读取资讯数据，按文件 mtime 做缓存，避免每次请求都读盘。"""
-    if not os.path.exists(DATA_FILE):
-        return None
-    mtime = os.path.getmtime(DATA_FILE)
+    """读取资讯数据。
+
+    优先使用远程（GitHub）数据，保证自动更新；
+    远程不可用时回退到本地文件。
+    带 5 分钟缓存，避免每个请求都访问远程。
+    """
+    now = time.time()
     with _lock:
-        if _cache['data'] is not None and _cache['mtime'] == mtime:
+        if _cache['data'] is not None and (now - _cache['key']) < _CACHE_TTL:
             return _cache['data']
-        try:
-            with open(DATA_FILE, encoding='utf-8') as f:
-                data = json.load(f)
-        except Exception:
-            return None
-        _cache['mtime'] = mtime
-        _cache['data'] = data
-        return data
+
+    remote = fetch_remote()
+    local = load_local()
+
+    # 两边都有时，取条目更多的（远程通常更新更全）
+    if remote and local:
+        chosen = remote if len(remote['items']) >= len(local['items']) else local
+    else:
+        chosen = remote or local
+
+    if chosen:
+        with _lock:
+            _cache['key'] = now
+            _cache['data'] = chosen
+    return chosen
 
 
 # ---------------- 业务逻辑 ----------------
@@ -302,6 +351,12 @@ class Handler(BaseHTTPRequestHandler):
     # ---- 各接口实现 ----
     def handle_health(self, rid):
         data = load_data()
+        local = load_local()
+        remote = 'unknown'
+        try:
+            remote = 'ok' if fetch_remote() else 'unreachable'
+        except Exception:
+            remote = 'error'
         self.send_json({
             'success': True,
             'data': {
@@ -310,6 +365,8 @@ class Handler(BaseHTTPRequestHandler):
                 'data_available': data is not None,
                 'item_count': data.get('count', 0) if data else 0,
                 'data_updated_at': data.get('updated_at') if data else None,
+                'data_source': 'github' if (data and len(data['items']) >= len(local['items'] if local else {'items': []})) else 'local',
+                'remote_status': remote,
                 'uptime_seconds': round(time.time() - START_TIME, 1),
                 'auth_required': bool(API_KEY),
                 'server_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -323,7 +380,9 @@ class Handler(BaseHTTPRequestHandler):
             'data': {
                 'name': '武汉大学校园资讯聚合 API',
                 'version': API_VERSION,
-                'description': '提供武汉大学各官方渠道资讯的查询接口',
+                'description': '提供武汉大学各官方渠道资讯的查询接口。数据每日由 GitHub Actions 自动采集更新。',
+                'data_source': REMOTE_DATA_URL,
+                'auto_update': '每日 08:00 与 18:00（北京时间）自动采集',
                 'auth': {
                     'required': bool(API_KEY),
                     'type': 'API Key',

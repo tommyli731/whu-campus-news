@@ -1,0 +1,80 @@
+name: 定时采集校园资讯
+
+# 每天 08:00 与 18:00 各采集一次（北京时间 UTC+8）
+schedule:
+  - cron: '0 0,10 * * *'   # 00:00 与 10:00 UTC = 北京时间 08:00 / 18:00
+
+# 手动触发
+workflow_dispatch:
+  inputs:
+    days:
+      description: '采集最近多少天'
+      required: false
+      default: '60'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: campus-news-crawler
+  cancel-in-progress: false
+
+jobs:
+  crawl:
+    name: 采集并提交
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 运行采集
+        id: crawl
+        run: |
+          DAYS="${{ github.event.inputs.days || '60' }}"
+          echo "采集最近 ${DAYS} 天"
+          python update.py --days "$DAYS" 2>&1 | tee crawl.log
+
+      - name: 校验数据
+        run: |
+          python - <<'PY'
+          import json, sys
+          with open('data_news.json', encoding='utf-8') as f:
+              d = json.load(f)
+          n = d.get('count', 0)
+          print(f"条目数: {n}")
+          print(f"更新时间: {d.get('updated_at')}")
+          if n == 0:
+              print('::error::采集结果为空，终止提交（保留线上原数据）')
+              sys.exit(1)
+          dates = [i['d'] for i in d['items'] if i.get('d')]
+          print(f"日期区间: {min(dates)} ~ {max(dates)}")
+          print(f"数据校验通过")
+          PY
+
+      - name: 提交变更
+        run: |
+          if git diff --quiet data_news.json; then
+            echo "数据无变化，跳过提交"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data_news.json crawler/data/news.json
+          git commit -m "chore(data): 自动采集 $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push origin HEAD:main
+          echo "提交完成"
+
+      - name: 同步到 API 部署目录
+        # 若线上API 部署在独立仓库，取消下面注释并填入路径
+        # run: |
+        #   cd ../whu-campus-api
+        #   cp ../whu-campus-news/data_news.json .
+        #   git add data_news.json && git commit -m "chore: 同步数据" && git push
+        echo "如需同步至独立API 仓库，请配置此步骤"
