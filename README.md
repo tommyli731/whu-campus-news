@@ -12,7 +12,7 @@
 - **双视角分离**：学生资讯与教师资讯明确区分，互不混杂
 - **6 大分类**：要闻速览、学术讲座、通知公告、院系动态、文体活动、党团思政
 - **三档重要度**：S 级（权威发布口）/ A 级（较重要）/ B 级（常规）
-- **自动采集**：7 个官方信源，定时抓取公开页面
+- **自动采集**：7 个官方信源定时抓取；可选用 WeRSS 接入微信公众号
 - **来源可追溯**：每条资讯标注栏目、发布机构、作者、原文链接
 - **49 个渠道清单**：含类型、所属单位、内容范围与访问入口
 - **REST API**：8 个接口，附OpenAPI 3.0 规范
@@ -77,7 +77,8 @@ cp -r whu-campus-news/plugin ~/.deepseek-harness/plugins/
 ├── update.py               # 一键更新数据
 ├── release.py              # 版本化发布工具
 ├── crawler/
-│   └── crawler.py          # 采集脚本（零依赖）
+│   ├── crawler.py          # 官网采集脚本（零依赖）
+│   └── wechat_mp.py        # 公众号采集适配器（经 WeRSS，可选）
 ├── plugin/                 # DeepSeek Harness 插件
 │   ├── package.json
 │   ├── plugin.json

@@ -413,6 +413,23 @@ def main():
             print(f'    [错误] {type(e).__name__}: {e}', file=sys.stderr)
         time.sleep(1.2)
 
+    # 微信公众号（经 WeRSS 转换）
+    if not args.source or args.source == 'wechat':
+        try:
+            import wechat_mp
+            print(f'  [wechat] 微信公众号（经 WeRSS）')
+            items = wechat_mp.collect(since)
+            new = [i for i in items if i['id'] not in seen]
+            for i in new:
+                seen.add(i['id'])
+            all_items += new
+            print(f'    -> 新增 {len(new)} 条')
+        except ImportError:
+            print('    [跳过] 未找到 wechat_mp.py 模块')
+        except Exception as e:
+            errors += 1
+            print(f'    [错误] 公众号采集失败 {type(e).__name__}: {e}', file=sys.stderr)
+
     all_items.sort(key=lambda x: x['d'], reverse=True)
 
     # 数据合并：与历史数据去重合并，避免重复运行时清空已有数据
