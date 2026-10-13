@@ -16,6 +16,8 @@
 - **来源可追溯**：每条资讯标注栏目、发布机构、作者、原文链接
 - **49 个渠道清单**：含类型、所属单位、内容范围与访问入口
 - **REST API**：8 个接口，附OpenAPI 3.0 规范
+- **AI 插件**：DeepSeek Harness 插件，4 个模型可调用工具
+- **自动更新**：GitHub Actions 每日两次采集
 - **零依赖**：仅使用 Python 标准库，无需 `pip install`
 
 ---
@@ -51,11 +53,16 @@ python api.py     # http://localhost:8000
 > **你**：最近有什么重要的通知？
 > **AI**：（自动调用插件）找到 3 条重要通知……
 
-**插件仓库**：[tommyli731/dsh-plugin-whu-news](https://github.com/tommyli731/dsh-plugin-whu-news)
+插件位于 [`plugin/`](./plugin) 目录，随本仓库一起分发：
+
+```bash
+git clone https://github.com/tommyli731/whu-campus-news.git
+cp -r whu-campus-news/plugin ~/.deepseek-harness/plugins/
+```
 
 提供 4 个工具：`whu_notices` 浏览资讯 · `whu_search` 关键词搜索 · `whu_notice_detail` 查看详情 · `whu_news_overview` 数据概览
 
-详见[插件 README](https://github.com/tommyli731/dsh-plugin-whu-news)。
+详见 [plugin/README.md](./plugin/README.md)。
 
 ---
 
@@ -63,7 +70,7 @@ python api.py     # http://localhost:8000
 
 ```
 ├── index.html              # 主网站（响应式，支持移动端）
-├── data_news.json         # 采集生成的资讯数据
+├── data_news.json          # 采集生成的资讯数据
 ├── api.py                  # REST API 服务
 ├── openapi.yaml            # OpenAPI 3.0 规范
 ├── API文档.md              # 接口文档（可读版）
@@ -71,6 +78,13 @@ python api.py     # http://localhost:8000
 ├── release.py              # 版本化发布工具
 ├── crawler/
 │   └── crawler.py          # 采集脚本（零依赖）
+├── plugin/                 # DeepSeek Harness 插件
+│   ├── package.json
+│   ├── plugin.json
+│   ├── src/index.ts        # 插件入口（4 个工具）
+│   └── test-core.mjs       # 插件逻辑测试
+├── .github/workflows/
+│   └── crawler.yml         # 定时自动采集
 ├── snapshots/              # 版本快照存档
 ├── 渠道清单与信息架构规划.md
 ├── 数据采集说明.md

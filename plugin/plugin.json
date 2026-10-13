@@ -1,0 +1,28 @@
+{
+  "name": "whu-news",
+  "displayName": "武汉大学校园资讯",
+  "description": "让 AI 助手直接查询武汉大学校园通知、讲座与活动",
+  "api": {
+    "base": "https://whu-campus-news.app.workbuddy.host",
+    "auth": "none",
+    "timeout": 15000
+  },
+  "tools": [
+    {
+      "name": "whu_notices",
+      "description": "浏览校园资讯"
+    },
+    {
+      "name": "whu_search",
+      "description": "关键词搜索"
+    },
+    {
+      "name": "whu_notice_detail",
+      "description": "查看单条详情"
+    },
+    {
+      "name": "whu_news_overview",
+      "description": "资讯概览与统计"
+    }
+  ]
+}
