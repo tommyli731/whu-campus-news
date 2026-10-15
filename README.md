@@ -79,6 +79,8 @@ cp -r whu-campus-news/plugin ~/.deepseek-harness/plugins/
 ├── crawler/
 │   ├── crawler.py          # 官网采集脚本（零依赖）
 │   └── wechat_mp.py        # 公众号采集适配器（经 WeRSS，可选）
+├── tools/
+│   └── search_wechat.py    # 微信公众号速查（手动查询，零依赖）
 ├── plugin/                 # DeepSeek Harness 插件
 │   ├── package.json
 │   ├── plugin.json
